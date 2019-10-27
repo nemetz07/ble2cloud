@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/device_details_constraintlayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#00A0A0A0"
+    tools:context=".ui.deviceDetails.fragment.DeviceDetailsFragment">
+
+    <TextView
+        android:id="@+id/device_detail_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="8dp"
+        android:text="Device Name"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:typeface="normal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/device_detail_connected"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="Not connected"
+        android:textColor="#C62828"
+        app:layout_constraintEnd_toEndOf="@+id/device_detail_name"
+        app:layout_constraintStart_toStartOf="@+id/device_detail_name"
+        app:layout_constraintTop_toBottomOf="@+id/device_detail_name" />
+
+    <Button
+        android:id="@+id/device_detail_connect_button"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:background="@color/design_default_color_primary"
+        android:text="Connect"
+        android:textColor="@color/common_google_signin_btn_text_dark_default"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/device_detail_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="-"
+        android:textSize="60sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/device_detail_connect_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/device_detail_connected" />
+
+    <ImageView
+        android:id="@+id/device_detail_unit"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        android:src="@drawable/ic_heart"
+        android:tint="@color/colorPrimaryDark"
+        app:layout_constraintBottom_toBottomOf="@+id/device_detail_value"
+        app:layout_constraintStart_toEndOf="@+id/device_detail_value"
+        app:layout_constraintTop_toTopOf="@+id/device_detail_value" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

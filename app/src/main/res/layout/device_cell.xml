@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="?attr/listPreferredItemHeightLarge"
+    android:layout_centerHorizontal="false"
+    android:layout_marginTop="8dp"
+    android:layout_marginStart="15dp"
+    android:layout_marginEnd="15dp"
+    android:background="@drawable/rounded_background"
+    android:orientation="vertical">
+
+    <ImageView
+        android:id="@+id/device_icon"
+        android:layout_width="@android:dimen/app_icon_size"
+        android:layout_height="match_parent"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="10dp"
+        android:gravity="center"
+        android:padding="0dp"
+        android:src="@drawable/ic_cpu"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/device_name_tv"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/device_name_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|center_vertical"
+        android:layout_marginStart="16dp"
+        android:fontFamily="@font/open_sans"
+        android:singleLine="true"
+        android:maxLines="1"
+        android:maxEms="7"
+        android:ellipsize="end"
+        android:text="Device Name"
+        android:textColor="#E9E9E9"
+        android:textSize="24sp"
+        app:layout_constraintStart_toEndOf="@+id/device_icon"
+        app:layout_constraintTop_toTopOf="@+id/device_icon" />
+
+    <TextView
+        android:id="@+id/device_address_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/open_sans"
+        android:text="Device Address"
+        android:textColor="#E9E9E9"
+        app:layout_constraintStart_toStartOf="@+id/device_name_tv"
+        app:layout_constraintTop_toBottomOf="@+id/device_name_tv" />
+
+    <TextView
+        android:id="@+id/device_rssi_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="24dp"
+        android:fontFamily="@font/open_sans"
+        android:text="RSSI"
+        android:textColor="#E9E9E9"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/device_connectable"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="8dp"
+        android:fontFamily="@font/open_sans"
+        android:text="Connectable"
+        android:textColor="#E9E9E9"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
