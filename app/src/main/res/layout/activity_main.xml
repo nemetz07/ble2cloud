@@ -26,8 +26,8 @@
         android:background="@color/colorPrimaryDark"
         android:paddingTop="10dp"
         android:paddingBottom="10dp"
-        app:itemIconTint="#ECECEC"
-        app:itemTextColor="#D8D8D8"
+        app:itemIconTint="@color/bottom_navigation_states"
+        app:itemTextColor="@color/bottom_navigation_states"
         app:menu="@menu/bottom_navigation_menu" />
 
 </RelativeLayout>

@@ -18,7 +18,7 @@ import androidx.navigation.ui.NavigationUI
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.nemetz.ble2cloud.event.*
 import com.nemetz.ble2cloud.connection.BLEConnection
-import com.nemetz.ble2cloud.data.DevicesRepository
+import com.nemetz.ble2cloud.data.SensorRepository
 import com.nemetz.ble2cloud.utils.manager.BaseAccessManager
 import com.nemetz.ble2cloud.utils.manager.PermissionManager
 import com.nemetz.ble2cloud.utils.manager.SharedPreferencesManager
@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        DevicesRepository.setUp()
+        SensorRepository.setUp()
 
         bleConnection = BLEConnection(this)
 
@@ -210,7 +210,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     @Subscribe
-    fun onConnectToDevice(event: ConnectToDevice){
+    fun onConnectToSensor(event: ConnectToSensor){
 //        bleConnection.connect(event.position)
     }
 

@@ -1,10 +1,10 @@
-package com.nemetz.ble2cloud.ui.deviceBrowser.model
+package com.nemetz.ble2cloud.ui.scanner.model
 
 import android.bluetooth.BluetoothDevice
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
-//data class DeviceCell(
+//data class SensorCell(
 //    var name: String,
 //    var address: String,
 //    var rssi: Int,
@@ -17,7 +17,7 @@ import kotlinx.android.parcel.Parcelize
 //)
 
 @Parcelize
-data class DeviceCell(
+data class SensorCell(
     var device: BluetoothDevice,
     var rssi: Int,
     var isConnectable: Boolean

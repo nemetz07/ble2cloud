@@ -7,7 +7,7 @@ import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanSettings
 import android.content.Context
-import com.nemetz.ble2cloud.ui.deviceBrowser.model.DeviceCell
+import com.nemetz.ble2cloud.ui.scanner.model.SensorCell
 import kotlinx.coroutines.delay
 
 class BLEScanner private constructor(
@@ -37,7 +37,7 @@ class BLEScanner private constructor(
     private lateinit var bluetoothLeScanner: BluetoothLeScanner
     private var bluetoothAdapter: BluetoothAdapter
 
-    private var cellDevices: MutableList<DeviceCell> = mutableListOf()
+    private var cellDevices: MutableList<SensorCell> = mutableListOf()
 
     init {
         bluetoothAdapter =

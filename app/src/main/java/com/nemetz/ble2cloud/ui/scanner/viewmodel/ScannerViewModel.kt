@@ -1,4 +1,4 @@
-package com.nemetz.ble2cloud.ui.deviceBrowser.viewmodel
+package com.nemetz.ble2cloud.ui.scanner.viewmodel
 
 import android.bluetooth.*
 import android.bluetooth.le.ScanCallback
@@ -12,16 +12,16 @@ import com.nemetz.ble2cloud.BLEApplication
 import com.nemetz.ble2cloud.connection.BLEScanner
 import com.nemetz.ble2cloud.connection.MyScanFilter
 import com.nemetz.ble2cloud.connection.MyScanSettings
-import com.nemetz.ble2cloud.data.DevicesRepository
-import com.nemetz.ble2cloud.event.DeviceConnectedEvent
-import com.nemetz.ble2cloud.ui.deviceBrowser.model.DeviceCell
+import com.nemetz.ble2cloud.data.SensorRepository
+import com.nemetz.ble2cloud.event.SensorConnectedEvent
+import com.nemetz.ble2cloud.ui.scanner.model.SensorCell
 import org.greenrobot.eventbus.EventBus
 import java.util.*
 
-class DeviceBrowserViewModel(application: BLEApplication) : AndroidViewModel(application) {
-    private val TAG = "DEVICE_BROWSER_VIEWMODEL"
+class ScannerViewModel(application: BLEApplication) : AndroidViewModel(application) {
+    private val TAG = "SCANNER_VIEWMODEL"
 
-    private var cellDevices: MutableList<DeviceCell> = mutableListOf()
+    private var cellSensors: MutableList<SensorCell> = mutableListOf()
     private var context: Context = getApplication<BLEApplication>().applicationContext
     private var bleScanner: BLEScanner
 
@@ -29,11 +29,11 @@ class DeviceBrowserViewModel(application: BLEApplication) : AndroidViewModel(app
         @RequiresApi(Build.VERSION_CODES.O)
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             if (result.device != null) {
-                if(!cellDevices.any{ it.device.address == result.device.address }){
-                    DevicesRepository.addDevice(result.device)
+                if(!cellSensors.any{ it.device.address == result.device.address }){
+                    SensorRepository.addSensor(result.device)
 
-                    cellDevices.add(
-                        DeviceCell(
+                    cellSensors.add(
+                        SensorCell(
                             result.device,
                             result.rssi,
                             result.isConnectable
@@ -54,16 +54,16 @@ class DeviceBrowserViewModel(application: BLEApplication) : AndroidViewModel(app
             .build()
     }
 
-    fun getDevices(): ArrayList<DeviceCell> {
-        return cellDevices as ArrayList<DeviceCell>
+    fun getSensors(): ArrayList<SensorCell> {
+        return cellSensors as ArrayList<SensorCell>
     }
 
-    suspend fun scanDevices(): Boolean {
-        DevicesRepository.clearDevices()
-        cellDevices.clear()
+    suspend fun scanSensors(): Boolean {
+        SensorRepository.clearSensors()
+        cellSensors.clear()
         val isFinished = bleScanner.scanLeDevice(5000)
-        cellDevices.sortBy { it.rssi }
-        cellDevices.reverse()
+        cellSensors.sortBy { it.rssi }
+        cellSensors.reverse()
         return true
     }
 
@@ -89,7 +89,7 @@ class DeviceBrowserViewModel(application: BLEApplication) : AndroidViewModel(app
                         BluetoothGatt.GATT_SUCCESS -> {
                             Log.d(TAG, "Service discover success")
 
-                            EventBus.getDefault().post(DeviceConnectedEvent(gatt))
+                            EventBus.getDefault().post(SensorConnectedEvent(gatt))
 
                             for (service in gatt.services) {
                                 Log.d(TAG, "SERVICE: ${service.uuid}")
@@ -119,12 +119,12 @@ class DeviceBrowserViewModel(application: BLEApplication) : AndroidViewModel(app
         )
     }
 
-    fun setDevices(newDevices: MutableList<DeviceCell>) {
-        cellDevices = newDevices
+    fun setSensors(newSensors: MutableList<SensorCell>) {
+        cellSensors = newSensors
     }
 
-    fun shuffleDevices() {
-        cellDevices.shuffle()
+    fun shuffleSensors() {
+        cellSensors.shuffle()
     }
 
     fun getRandomMacAddress(): String {
@@ -138,11 +138,11 @@ class DeviceBrowserViewModel(application: BLEApplication) : AndroidViewModel(app
     }
 
     fun autoConnect() {
-//        val mDevices = DevicesRepository.devices
+//        val mDevices = SensorRepository.devices
 //
-//        for (cellDevice in cellDevices) {
-//            if (mDevices.any { it.macAddress == cellDevice.device.address }) {
-//                Log.d(TAG, "Connect to ${cellDevice.device.name}")
+//        for (cellDevice in cellSensors) {
+//            if (mDevices.any { it.macAddress == cellDevice.sensor.address }) {
+//                Log.d(TAG, "Connect to ${cellDevice.sensor.name}")
 //            }
 //        }
     }

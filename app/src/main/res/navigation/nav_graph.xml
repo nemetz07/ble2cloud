@@ -5,19 +5,9 @@
             app:startDestination="@+id/action_home">
 
     <fragment android:id="@+id/action_scan"
-              android:name="com.nemetz.ble2cloud.ui.deviceBrowser.fragment.DeviceBrowserFragment"
-              android:label="DeviceBrowserFragment"
-              tools:layout="@layout/device_browser_fragment">
-        <action android:id="@+id/openDetailsAction"
-                app:destination="@id/deviceDetailsFragment" app:enterAnim="@anim/nav_default_enter_anim"
-                app:exitAnim="@anim/nav_default_pop_exit_anim" app:popEnterAnim="@anim/nav_default_pop_enter_anim"
-                app:popExitAnim="@anim/nav_default_pop_exit_anim"/>
-    </fragment>
-    <fragment android:id="@+id/deviceDetailsFragment"
-              android:name="com.nemetz.ble2cloud.ui.deviceDetails.fragment.DeviceDetailsFragment"
-              android:label="device_details_fragment" tools:layout="@layout/device_details_fragment">
-        <argument android:name="device" app:argType="com.nemetz.ble2cloud.ui.deviceBrowser.model.DeviceCell"/>
-    </fragment>
+              android:name="com.nemetz.ble2cloud.ui.scanner.fragment.ScannerFragment"
+              android:label="ScannerFragment"
+              tools:layout="@layout/scanner_fragment"/>
     <fragment
         android:id="@+id/action_home"
         android:name="com.nemetz.ble2cloud.ui.home.fragment.HomeFragment"

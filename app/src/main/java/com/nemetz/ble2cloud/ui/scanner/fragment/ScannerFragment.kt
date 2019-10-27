@@ -1,4 +1,4 @@
-package com.nemetz.ble2cloud.ui.deviceBrowser.fragment
+package com.nemetz.ble2cloud.ui.scanner.fragment
 
 import android.app.Activity
 import android.os.Bundle
@@ -14,27 +14,26 @@ import com.nemetz.ble2cloud.R
 import com.nemetz.ble2cloud.event.AutoConnectEvent
 import com.nemetz.ble2cloud.ui.base.factory.BaseViewModelFactory
 import com.nemetz.ble2cloud.ui.base.fragment.BaseFragment
-import com.nemetz.ble2cloud.ui.deviceBrowser.adapter.DeviceBrowserAdapter
-import com.nemetz.ble2cloud.ui.deviceBrowser.fragment.DeviceBrowserFragmentDirections
-import com.nemetz.ble2cloud.ui.deviceBrowser.viewmodel.DeviceBrowserViewModel
+import com.nemetz.ble2cloud.ui.scanner.adapter.ScannerAdapter
+import com.nemetz.ble2cloud.ui.scanner.viewmodel.ScannerViewModel
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
-class DeviceBrowserFragment : BaseFragment() {
-    override val TAG = "DEVICE_BROWSER_FRAGMENT"
+class ScannerFragment : BaseFragment() {
+    override val TAG = "SCANNER_FRAGMENT"
 
-    private lateinit var viewModel: DeviceBrowserViewModel
+    private lateinit var viewModel: ScannerViewModel
     private lateinit var activity: Activity
     private lateinit var application: BLEApplication
 
     companion object {
-        fun newInstance() = DeviceBrowserFragment()
+        fun newInstance() = ScannerFragment()
     }
 
     private lateinit var recyclerView: RecyclerView
-    private lateinit var viewAdapter: DeviceBrowserAdapter
+    private lateinit var viewAdapter: ScannerAdapter
     private lateinit var viewManager: RecyclerView.LayoutManager
 
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
@@ -43,7 +42,7 @@ class DeviceBrowserFragment : BaseFragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.device_browser_fragment, container, false)
+        return inflater.inflate(R.layout.scanner_fragment, container, false)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,17 +62,16 @@ class DeviceBrowserFragment : BaseFragment() {
         activity = context as Activity
         application = getActivity()!!.application as BLEApplication
         viewModel =
-            ViewModelProviders.of(this, BaseViewModelFactory(application)).get(
-                DeviceBrowserViewModel::class.java)
+            ViewModelProviders.of(this, BaseViewModelFactory(application)).get(ScannerViewModel::class.java)
         init()
 
-        swipeRefreshLayout = activity.findViewById(R.id.device_browser_refresh)
+        swipeRefreshLayout = activity.findViewById(R.id.scanner_refresh)
         swipeRefreshLayout.setOnRefreshListener {
             GlobalScope.launch {
-                if (viewModel.scanDevices()) {
+                if (viewModel.scanSensors()) {
                     Log.d("BLEScan", "Scan finished!")
                     activity.runOnUiThread {
-                        viewAdapter.cellDevices = viewModel.getDevices()
+                        viewAdapter.cellSensors = viewModel.getSensors()
                         viewAdapter.notifyDataSetChanged()
                     }
                     swipeRefreshLayout.isRefreshing = false
@@ -84,21 +82,25 @@ class DeviceBrowserFragment : BaseFragment() {
 
     fun init() {
         viewManager = LinearLayoutManager(context)
-        viewAdapter = DeviceBrowserAdapter(viewModel.getDevices())
-        viewAdapter.setClickListener(object : DeviceBrowserAdapter.ItemClickListener {
+        viewAdapter =
+            ScannerAdapter(viewModel.getSensors())
+        viewAdapter.setClickListener(object : ScannerAdapter.ItemClickListener {
             override fun onItemClick(view: View, position: Int) {
-                val action =
-                    DeviceBrowserFragmentDirections.openDetailsAction(viewAdapter.getItem(position))
-                findNavController().navigate(action)
+                Log.d(TAG, "Item clicked!")
             }
         })
 
-        recyclerView = activity.findViewById<RecyclerView>(R.id.device_browser_recycler_view).apply {
+        recyclerView = activity.findViewById<RecyclerView>(R.id.scanner_recyclerview).apply {
             setHasFixedSize(true)
 
             layoutManager = viewManager
             adapter = viewAdapter
         }
+
+        Log.d(TAG, "${viewModel}")
+
+        viewAdapter.cellSensors = viewModel.getSensors()
+        viewAdapter.notifyDataSetChanged()
     }
 
     @Subscribe
