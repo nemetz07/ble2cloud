@@ -7,53 +7,40 @@ import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanSettings
 import android.content.Context
-import com.nemetz.ble2cloud.ui.scanner.model.SensorCell
+import android.util.Log
 import kotlinx.coroutines.delay
 
-class BLEScanner private constructor(
-    val context: Context,
-    val scanFilter: List<ScanFilter>?,
-    val scanSettings: ScanSettings?,
-    val scanCallback: ScanCallback?
-) {
-    data class Builder(
-        val context: Context
-    ) {
-
-        lateinit var scanFilter: List<ScanFilter>
-        lateinit var scanSettings: ScanSettings
-        lateinit var scanCallback: ScanCallback
-
-        fun setScanFilter(scanFilter: List<ScanFilter>) = apply { this.scanFilter = scanFilter }
-        fun setScanSettings(scanSettings: ScanSettings) = apply { this.scanSettings = scanSettings }
-        fun setScanCallback(scanCallback: ScanCallback) = apply { this.scanCallback = scanCallback }
-        fun build() = BLEScanner(context, scanFilter, scanSettings, scanCallback)
-    }
-
-    val SCAN_PERIOD: Long = 3000
+object BLEScanner {
+    private const val SCAN_PERIOD: Long = 3000
 
     private var mScanning = false
 
-    private lateinit var bluetoothLeScanner: BluetoothLeScanner
-    private var bluetoothAdapter: BluetoothAdapter
+    private var bluetoothLeScanner: BluetoothLeScanner? = null
+    private var bluetoothAdapter: BluetoothAdapter? = null
 
-    private var cellDevices: MutableList<SensorCell> = mutableListOf()
-
-    init {
-        bluetoothAdapter =
-            (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter
+    fun setUp(context: Context) {
+        bluetoothAdapter = (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter
+        bluetoothLeScanner = bluetoothAdapter?.bluetoothLeScanner
     }
 
-    suspend fun scanLeDevice(scanPeriod: Long): Boolean {
-        bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
+    suspend fun scanLeDevice(
+        scanFilter: List<ScanFilter>,
+        scanSettings: ScanSettings,
+        scanCallback: ScanCallback,
+        scanPeriod: Long = SCAN_PERIOD
+    ): Boolean {
+        if (bluetoothLeScanner == null) {
+            Log.d("BLEScanner", "Scanner not initialized")
+            return false
+        }
 
         if (mScanning != true) {
-            bluetoothLeScanner.startScan(scanFilter, scanSettings, scanCallback)
+            bluetoothLeScanner!!.startScan(scanFilter, scanSettings, scanCallback)
             mScanning = true
 
             delay(scanPeriod)
 
-            bluetoothLeScanner.stopScan(scanCallback)
+            bluetoothLeScanner!!.stopScan(scanCallback)
             mScanning = false
         }
 

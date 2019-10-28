@@ -4,11 +4,9 @@ import android.bluetooth.BluetoothDevice
 
 
 object SensorRepository {
-    private lateinit var sensors: ArrayList<BluetoothDevice>
+    private var sensors: ArrayList<BluetoothDevice> = arrayListOf()
 
-    fun setUp(){
-        sensors = arrayListOf()
-    }
+    private var connectedSensors: ArrayList<BluetoothDevice> = arrayListOf()
 
     fun addSensor(btDevice: BluetoothDevice){
         sensors.add(btDevice)

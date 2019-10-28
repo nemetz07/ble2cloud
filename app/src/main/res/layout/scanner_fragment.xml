@@ -55,7 +55,7 @@
                 android:scrollbars="vertical"
                 android:paddingBottom="8dp"
                 android:clipToPadding="false"
-                tools:context=".ui.scanner.fragment.ScannerFragment">
+                tools:context=".ui.scanner.ScannerFragment">
 
             </androidx.recyclerview.widget.RecyclerView>
 

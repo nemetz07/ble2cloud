@@ -18,6 +18,9 @@ import androidx.navigation.ui.NavigationUI
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.nemetz.ble2cloud.event.*
 import com.nemetz.ble2cloud.connection.BLEConnection
+import com.nemetz.ble2cloud.connection.BLEScanner
+import com.nemetz.ble2cloud.connection.MyScanFilter
+import com.nemetz.ble2cloud.connection.MyScanSettings
 import com.nemetz.ble2cloud.data.SensorRepository
 import com.nemetz.ble2cloud.utils.manager.BaseAccessManager
 import com.nemetz.ble2cloud.utils.manager.PermissionManager
@@ -45,8 +48,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        SensorRepository.setUp()
-
         bleConnection = BLEConnection(this)
 
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navbar)
@@ -64,6 +65,8 @@ class MainActivity : AppCompatActivity() {
 
         if (PermissionManager.checkLocationPermission(this))
             EventBus.getDefault().post(LocationPermissionAvailableEvent())
+
+        BLEScanner.setUp(this)
     }
 
     override fun onStop() {

@@ -5,9 +5,6 @@ import android.content.Context
 import com.nemetz.ble2cloud.data.SensorRepository
 
 class BLEConnection(val context: Context) {
-
-
-
     fun connect(position: Int, gattCallback: BluetoothGattCallback){
         val device = SensorRepository.getSensor(position)
 

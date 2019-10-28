@@ -5,12 +5,17 @@
             app:startDestination="@+id/action_home">
 
     <fragment android:id="@+id/action_scan"
-              android:name="com.nemetz.ble2cloud.ui.scanner.fragment.ScannerFragment"
+              android:name="com.nemetz.ble2cloud.ui.scanner.ScannerFragment"
               android:label="ScannerFragment"
               tools:layout="@layout/scanner_fragment"/>
     <fragment
         android:id="@+id/action_home"
-        android:name="com.nemetz.ble2cloud.ui.home.fragment.HomeFragment"
+        android:name="com.nemetz.ble2cloud.ui.home.HomeFragment"
         android:label="home_fragment"
         tools:layout="@layout/home_fragment" />
+    <fragment
+        android:id="@+id/action_sensors"
+        android:name="com.nemetz.ble2cloud.ui.sensorBrowser.SensorBrowserFragment"
+        android:label="sensor_browser_fragment"
+        tools:layout="@layout/sensor_browser_fragment" />
 </navigation>
