@@ -4,17 +4,39 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingBottom="@dimen/bottom_navbar_height"
     android:backgroundTint="#00B3B3B3"
     tools:context=".ui.home.HomeFragment">
 
-    <TextView
-        android:id="@+id/textView"
+    <Button
+        android:id="@+id/uploadButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Home Fragment"
-        android:textSize="24sp"
+        android:layout_marginTop="32dp"
+        android:text="Upload to Firebase"
+        app:layout_constraintEnd_toEndOf="@+id/disconnectButton"
+        app:layout_constraintStart_toStartOf="@+id/disconnectButton"
+        app:layout_constraintTop_toBottomOf="@+id/disconnectButton" />
+
+    <Button
+        android:id="@+id/connectToSensorsButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Connect to sensors"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/disconnectButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Disconnect"
+        app:layout_constraintEnd_toEndOf="@+id/connectToSensorsButton"
+        app:layout_constraintStart_toStartOf="@+id/connectToSensorsButton"
+        app:layout_constraintTop_toBottomOf="@+id/connectToSensorsButton" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

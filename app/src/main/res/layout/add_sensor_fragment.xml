@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/bottom_navbar_height"
+    tools:context=".ui.addSensor.AddSensorFragment">
+
+    <TextView
+        android:id="@+id/addSensorNameTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="SENSOR_NAME"
+        android:textSize="24sp"
+        app:layout_constraintStart_toStartOf="@+id/addSensorTitleTV"
+        app:layout_constraintTop_toBottomOf="@+id/addSensorTitleTV" />
+
+    <TextView
+        android:id="@+id/addSensorAddressTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="SENSOR_ADDRESS"
+        app:layout_constraintStart_toStartOf="@+id/addSensorNameTV"
+        app:layout_constraintTop_toBottomOf="@+id/addSensorNameTV" />
+
+    <TextView
+        android:id="@+id/addSensorTitleTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="Add Sensor"
+        android:textSize="36sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/addSensorFoundCharacteristicsTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Found characteristics:"
+        app:layout_constraintStart_toStartOf="@+id/addSensorAddressTV"
+        app:layout_constraintTop_toBottomOf="@+id/addSensorAddressTV" />
+
+    <Button
+        android:id="@+id/addSensorDoneButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="0dp"
+        android:background="@color/colorButtonSuccess"
+        android:enabled="false"
+        android:padding="0dp"
+        android:text="Discovering characteristics..."
+        android:textColor="#FFFFFF"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/addSensorRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/addSensorDoneButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/addSensorFoundCharacteristicsTV" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

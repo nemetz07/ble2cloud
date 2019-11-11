@@ -8,7 +8,7 @@
     android:orientation="vertical">
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/scanner_refresh"
+        android:id="@+id/scannerRefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -27,13 +27,13 @@
                     android:layout_width="120dp"
                     android:layout_height="120dp"
                     android:src="@drawable/ic_bluetooth"
-                    app:layout_constraintBottom_toBottomOf="@+id/scanner_bottom_text"
+                    app:layout_constraintBottom_toBottomOf="@+id/scannerBottomText"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:id="@+id/scanner_bottom_text"
+                    android:id="@+id/scannerBottomText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
@@ -45,13 +45,25 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent" />
 
+                <TextView
+                    android:id="@+id/scannerBackButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="8dp"
+                    android:text="Back"
+                    android:textColor="#FFFFFF"
+                    android:textSize="24sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/scanner_recyclerview"
+                android:id="@+id/scannerRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginBottom="60dp"
+                android:layout_marginBottom="@dimen/bottom_navbar_height"
                 android:scrollbars="vertical"
                 android:paddingBottom="8dp"
                 android:clipToPadding="false"

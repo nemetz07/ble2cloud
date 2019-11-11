@@ -7,7 +7,11 @@
     <fragment android:id="@+id/action_scan"
               android:name="com.nemetz.ble2cloud.ui.scanner.ScannerFragment"
               android:label="ScannerFragment"
-              tools:layout="@layout/scanner_fragment"/>
+              tools:layout="@layout/scanner_fragment">
+        <action
+            android:id="@+id/action_action_scan_to_addSensorFragment"
+            app:destination="@id/addSensorFragment" />
+    </fragment>
     <fragment
         android:id="@+id/action_home"
         android:name="com.nemetz.ble2cloud.ui.home.HomeFragment"
@@ -17,5 +21,30 @@
         android:id="@+id/action_sensors"
         android:name="com.nemetz.ble2cloud.ui.sensorBrowser.SensorBrowserFragment"
         android:label="sensor_browser_fragment"
-        tools:layout="@layout/sensor_browser_fragment" />
+        tools:layout="@layout/sensor_browser_fragment" >
+        <action
+            android:id="@+id/action_action_sensors_to_action_scan"
+            app:destination="@id/action_scan" />
+        <action
+            android:id="@+id/action_action_sensors_to_sensorDetailFragment"
+            app:destination="@id/sensorDetailFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/addSensorFragment"
+        android:name="com.nemetz.ble2cloud.ui.addSensor.AddSensorFragment"
+        android:label="add_sensor_fragment"
+        tools:layout="@layout/add_sensor_fragment" >
+        <argument
+            android:name="device"
+            app:argType="android.bluetooth.BluetoothDevice" />
+    </fragment>
+    <fragment
+        android:id="@+id/sensorDetailFragment"
+        android:name="com.nemetz.ble2cloud.ui.sensorDetail.SensorDetailFragment"
+        android:label="sensor_detail_fragment"
+        tools:layout="@layout/sensor_detail_fragment" >
+        <argument
+            android:name="sensor"
+            app:argType="com.nemetz.ble2cloud.data.MySensor" />
+    </fragment>
 </navigation>

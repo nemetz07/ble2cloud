@@ -1,4 +1,4 @@
-package com.nemetz.ble2cloud.utils.receiver
+package com.nemetz.ble2cloud.receiver
 
 import android.bluetooth.BluetoothAdapter
 import android.content.BroadcastReceiver

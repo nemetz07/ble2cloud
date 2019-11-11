@@ -14,13 +14,14 @@ object BLEScanner {
     private const val SCAN_PERIOD: Long = 3000
 
     private var mScanning = false
-
     private var bluetoothLeScanner: BluetoothLeScanner? = null
-    private var bluetoothAdapter: BluetoothAdapter? = null
+    var isReady = false
 
     fun setUp(context: Context) {
-        bluetoothAdapter = (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter
-        bluetoothLeScanner = bluetoothAdapter?.bluetoothLeScanner
+        bluetoothLeScanner = (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter?.bluetoothLeScanner
+        if(bluetoothLeScanner != null){
+            isReady = true
+        }
     }
 
     suspend fun scanLeDevice(

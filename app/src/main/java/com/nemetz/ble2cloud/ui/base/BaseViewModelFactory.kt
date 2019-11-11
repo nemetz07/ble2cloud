@@ -3,9 +3,9 @@
 package com.nemetz.ble2cloud.ui.base
 
 import androidx.lifecycle.ViewModelProvider
-import com.nemetz.ble2cloud.BLEApplication
+import com.nemetz.ble2cloud.BLE2CloudApplication
 
-class BaseViewModelFactory(private val mApplication: BLEApplication): ViewModelProvider.NewInstanceFactory() {
+class BaseViewModelFactory(private val mApplication: BLE2CloudApplication): ViewModelProvider.NewInstanceFactory() {
 //
 //    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
 //        when(modelClass){

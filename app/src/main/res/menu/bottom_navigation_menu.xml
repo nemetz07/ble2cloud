@@ -7,13 +7,13 @@
         android:icon="@drawable/ic_home"
         android:title="Home" />
     <item
-        android:id="@+id/action_scan"
-        android:enabled="true"
-        android:icon="@drawable/ic_search"
-        android:title="Scan" />
-    <item
         android:id="@+id/action_sensors"
         android:enabled="true"
         android:icon="@drawable/ic_cpu"
         android:title="Sensors" />
+    <item
+        android:id="@+id/action_settings"
+        android:enabled="true"
+        android:icon="@drawable/ic_settings"
+        android:title="Settings" />
 </menu>

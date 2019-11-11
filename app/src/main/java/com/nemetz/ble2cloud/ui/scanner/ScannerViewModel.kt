@@ -9,54 +9,69 @@ import androidx.lifecycle.ViewModel
 import com.nemetz.ble2cloud.connection.BLEScanner
 import com.nemetz.ble2cloud.connection.MyScanFilter
 import com.nemetz.ble2cloud.connection.MyScanSettings
-import com.nemetz.ble2cloud.data.SensorRepository
-import java.util.*
+import com.nemetz.ble2cloud.data.*
+import com.nemetz.ble2cloud.utils.asFirestoreData
 
 class ScannerViewModel : ViewModel() {
     private val TAG = "SCANNER_VIEWMODEL"
 
-    private var cellSensors: MutableList<ScannerCell> = mutableListOf()
-//    private var context: Context = getApplication<BLEApplication>().applicationContext
+    val complexSensors: ArrayList<ComplexSensor> = arrayListOf()
+    val cellSensors: ArrayList<ScannerCell> = arrayListOf()
+    var isAlreadyScanned: Boolean = false
 
     private var scanCallback = object : ScanCallback() {
         @RequiresApi(Build.VERSION_CODES.O)
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             if (result.device != null) {
-                if (!cellSensors.any { it.device.address == result.device.address }) {
-                    SensorRepository.addSensor(result.device)
+                if (!complexSensors.containsAddress(result.device.address)) {
+                    Log.d(TAG, "SENSOR Found: $result")
 
-                    cellSensors.add(
-                        ScannerCell(
-                            result.device,
-                            result.rssi,
-                            result.isConnectable
-                        )
+                    val mySensor = MySensor(
+                        address = result.device.address,
+                        name = result.device.name ?: "-"
                     )
+
+                    complexSensors.add(ComplexSensor(mySensor, result.device, result.rssi))
                 }
             }
             super.onScanResult(callbackType, result)
         }
     }
 
-    override fun onCleared() {
-        Log.d(TAG, "VIEWMODEL CLEARED")
-        super.onCleared()
+    private fun ArrayList<ComplexSensor>.containsAddress(address: String): Boolean {
+        return this.any{ it.mySensor.address == address }
     }
 
-    fun getSensors(): ArrayList<ScannerCell> {
-        return cellSensors as ArrayList<ScannerCell>
+    private fun ArrayList<ComplexSensor>.sortByRSSI(){
+        sortBy { it.rssi }
+        reverse()
+    }
+
+    private fun updateCellSensors(){
+        cellSensors.clear()
+
+        for (sensor in complexSensors){
+            cellSensors.add(ScannerCell(
+                name = sensor.mySensor.name,
+                address = sensor.mySensor.address,
+                rssi = sensor.rssi
+            ))
+        }
     }
 
     suspend fun scanSensors(): Boolean {
-        SensorRepository.clearSensors()
-        cellSensors.clear()
+        complexSensors.clear()
+
         val isFinished = BLEScanner.scanLeDevice(
             MyScanFilter.SCAN_FILTER_EMPTY,
             MyScanSettings.SCAN_SETTINGS_LOW_ENERGY,
-            scanCallback
+            scanCallback,
+            3000
         )
-        cellSensors.sortBy { it.rssi }
-        cellSensors.reverse()
+
+        complexSensors.sortByRSSI()
+        updateCellSensors()
+
         return true
     }
 
@@ -86,7 +101,7 @@ class ScannerViewModel : ViewModel() {
 //
 //                            for (service in gatt.services) {
 //                                Log.d(TAG, "SERVICE: ${service.uuid}")
-//                                for (characteristic in service.characteristics) {
+//                                for (characteristic in service.myCharacteristics) {
 //                                    Log.d(TAG, "    -> CHARACTERISTIC: (${characteristic.uuid})")
 //                                    for (descriptor in characteristic.descriptors) {
 //                                        Log.d(TAG, "        -> DESCRIPTOR: ${descriptor.uuid}")
@@ -112,31 +127,21 @@ class ScannerViewModel : ViewModel() {
 //        )
 //    }
 
-    fun setSensors(newSensors: MutableList<ScannerCell>) {
-        cellSensors = newSensors
-    }
-
-    fun shuffleSensors() {
-        cellSensors.shuffle()
-    }
-
-    fun getRandomMacAddress(): String {
-        var mac = ""
-        val r = Random()
-        for (i in 0..5) {
-            val n: Int = r.nextInt(255)
-            mac += "${String.format("%02x", n)}:"
-        }
-        return mac.removeSuffix(":").toUpperCase()
-    }
-
-    fun autoConnect() {
-//        val mDevices = SensorRepository.devices
+//    fun setSensors(newSensors: ArrayList<ScannerCell>) {
+//        cellSensors = newSensors
+//    }
 //
-//        for (cellDevice in cellSensors) {
-//            if (mDevices.any { it.macAddress == cellDevice.sensor.address }) {
-//                Log.d(TAG, "Connect to ${cellDevice.sensor.name}")
-//            }
-//        }
-    }
+//    fun shuffleSensors() {
+//        cellSensors.shuffle()
+//    }
+
+//    fun autoConnect() {
+////        val mDevices = SensorRepository.devices
+////
+////        for (cellDevice in cellSensors) {
+////            if (mDevices.any { it.macAddress == cellDevice.sensor.address }) {
+////                Log.d(TAG, "Connect to ${cellDevice.sensor.name}")
+////            }
+////        }
+//    }
 }

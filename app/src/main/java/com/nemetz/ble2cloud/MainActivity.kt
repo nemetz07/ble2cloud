@@ -13,25 +13,27 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.findNavController
 import androidx.navigation.ui.NavigationUI
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.nemetz.ble2cloud.event.*
+import com.google.firebase.firestore.*
 import com.nemetz.ble2cloud.connection.BLEConnection
 import com.nemetz.ble2cloud.connection.BLEScanner
-import com.nemetz.ble2cloud.connection.MyScanFilter
-import com.nemetz.ble2cloud.connection.MyScanSettings
-import com.nemetz.ble2cloud.data.SensorRepository
+import com.nemetz.ble2cloud.event.*
+import com.nemetz.ble2cloud.utils.Collections
+import com.nemetz.ble2cloud.utils.getPath
 import com.nemetz.ble2cloud.utils.manager.BaseAccessManager
 import com.nemetz.ble2cloud.utils.manager.PermissionManager
 import com.nemetz.ble2cloud.utils.manager.SharedPreferencesManager
-import com.nemetz.ble2cloud.utils.receiver.BluetoothStateChangedReceiver
-import com.nemetz.ble2cloud.utils.receiver.LocationStateChangedReceiver
+import com.nemetz.ble2cloud.receiver.BluetoothStateChangedReceiver
+import com.nemetz.ble2cloud.receiver.LocationStateChangedReceiver
+import kotlinx.android.synthetic.main.activity_main.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), EventListener<QuerySnapshot> {
+
     private val TAG = "MAIN_ACTIVITY"
 
     private var btReceiver = BluetoothStateChangedReceiver()
@@ -41,6 +43,9 @@ class MainActivity : AppCompatActivity() {
     private var mLocEnabled = false
 
     private lateinit var bleConnection: BLEConnection
+    lateinit var viewModel: SharedViewModel
+    private var mCharacteristicRegistration: ListenerRegistration? = null
+    private var mSensorsRegistration: ListenerRegistration? = null
 
     /* Lifecycle START */
 
@@ -48,12 +53,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        viewModel = ViewModelProviders.of(this).get(SharedViewModel::class.java)
         bleConnection = BLEConnection(this)
 
-        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navbar)
 
         NavigationUI.setupWithNavController(
-            findViewById<BottomNavigationView>(R.id.bottom_navbar),
+            bottom_navbar,
             findNavController(R.id.nav_host_fragment)
         )
     }
@@ -63,10 +68,11 @@ class MainActivity : AppCompatActivity() {
 
         EventBus.getDefault().register(this)
 
+        mCharacteristicRegistration = (application as BLE2CloudApplication).firebaseRepo.addListener(Collections.CHARACTERISTICS, this)
+        mSensorsRegistration = (application as BLE2CloudApplication).firebaseRepo.addListener(Collections.SENSORS, this)
+
         if (PermissionManager.checkLocationPermission(this))
             EventBus.getDefault().post(LocationPermissionAvailableEvent())
-
-        BLEScanner.setUp(this)
     }
 
     override fun onStop() {
@@ -75,6 +81,9 @@ class MainActivity : AppCompatActivity() {
             unregisterReceiver(btReceiver)
             unregisterReceiver(locReceiver)
         }
+
+        (application as BLE2CloudApplication).firebaseRepo.removeListener(Collections.CHARACTERISTICS, mCharacteristicRegistration)
+        (application as BLE2CloudApplication).firebaseRepo.removeListener(Collections.SENSORS, mSensorsRegistration)
 
         EventBus.getDefault().unregister(this)
     }
@@ -108,6 +117,51 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             else -> super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        }
+    }
+
+    override fun onEvent(querySnapshot: QuerySnapshot?, exception: FirebaseFirestoreException?) {
+        // Handle errors
+        if (exception != null) {
+            Log.w(TAG, "onEvent:error", exception)
+            return
+        }
+
+        for (change in querySnapshot!!.documentChanges) {
+            when(change.getPath()){
+                Collections.SENSORS -> {
+                    when (change.type) {
+                        DocumentChange.Type.ADDED -> {
+                            viewModel.addSensor(change)
+                            Log.w(TAG, "SENSOR added")
+                        }
+                        DocumentChange.Type.MODIFIED -> {
+                            viewModel.modifySensor(change)
+                            Log.w(TAG, "SENSOR modified")
+                        }
+                        DocumentChange.Type.REMOVED -> {
+                            viewModel.removeSensor(change)
+                            Log.w(TAG, "SENSOR removed")
+                        }
+                    }
+                }
+                Collections.CHARACTERISTICS -> {
+                    when (change.type) {
+                        DocumentChange.Type.ADDED -> {
+                            viewModel.addCharacteristic(change)
+                            Log.w(TAG, "CHARACTERISTIC added")
+                        }
+                        DocumentChange.Type.MODIFIED -> {
+                            viewModel.modifyCharacteristic(change)
+                            Log.w(TAG, "CHARACTERISTIC modified")
+                        }
+                        DocumentChange.Type.REMOVED -> {
+                            viewModel.removeCharacteristic(change)
+                            Log.w(TAG, "CHARACTERISTIC removed")
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -145,22 +199,6 @@ class MainActivity : AppCompatActivity() {
     override fun onSupportNavigateUp() = findNavController(R.id.nav_host_fragment).navigateUp()
 
     /* Lifecycle END */
-
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        val inflater: MenuInflater = menuInflater
-        inflater.inflate(R.menu.main_menu, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.menu_auto_connect -> {
-                EventBus.getDefault().post(AutoConnectEvent())
-                true
-            }
-            else -> return super.onOptionsItemSelected(item)
-        }
-    }
 
     /* Events START */
 
@@ -203,6 +241,11 @@ class MainActivity : AppCompatActivity() {
 
         registerReceiver(btReceiver, IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED))
         registerReceiver(locReceiver, IntentFilter(LocationManager.MODE_CHANGED_ACTION))
+
+        BLEScanner.setUp(this)
+        if (!BLEScanner.isReady) {
+            finish()
+        }
     }
 
     @Subscribe
@@ -213,7 +256,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     @Subscribe
-    fun onConnectToSensor(event: ConnectToSensor){
+    fun onConnectToSensor(event: ConnectToSensor) {
 //        bleConnection.connect(event.position)
     }
 

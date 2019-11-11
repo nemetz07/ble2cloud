@@ -7,33 +7,35 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import org.greenrobot.eventbus.EventBus
 
 open class BaseFragment: Fragment(){
     protected open val TAG = this::class.simpleName
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
-        Log.d(TAG, "onActivityCreated")
         super.onActivityCreated(savedInstanceState)
+        Log.d(TAG, "onActivityCreated")
     }
 
     override fun onPause() {
-        Log.d(TAG, "onPause")
         super.onPause()
+        Log.d(TAG, "onPause")
     }
 
     override fun onResume() {
-        Log.d(TAG, "onResume")
         super.onResume()
+        Log.d(TAG, "onResume")
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.d(TAG, "onCreate")
         super.onCreate(savedInstanceState)
+        Log.d(TAG, "onCreate")
+        EventBus.getDefault().register(this)
     }
 
     override fun onStart() {
-        Log.d(TAG, "onStart")
         super.onStart()
+        Log.d(TAG, "onStart")
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -42,27 +44,28 @@ open class BaseFragment: Fragment(){
     }
 
     override fun onDestroyView() {
-        Log.d(TAG, "onDestroyView")
         super.onDestroyView()
+        Log.d(TAG, "onDestroyView")
     }
 
     override fun onStop() {
-        Log.d(TAG, "onStop")
         super.onStop()
+        Log.d(TAG, "onStop")
     }
 
     override fun onDestroy() {
         Log.d(TAG, "onDestroy")
+        EventBus.getDefault().unregister(this)
         super.onDestroy()
     }
 
     override fun onAttach(context: Context) {
-        Log.d(TAG, "onAttach")
         super.onAttach(context)
+        Log.d(TAG, "onAttach")
     }
 
     override fun onDetach() {
-        Log.d(TAG, "onDetach")
         super.onDetach()
+        Log.d(TAG, "onDetach")
     }
 }

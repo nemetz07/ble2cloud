@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "111356498878",
+    "firebase_url": "https://ble2cloud.firebaseio.com",
+    "project_id": "ble2cloud",
+    "storage_bucket": "ble2cloud.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:111356498878:android:616ca592bf97607e641fef",
+        "android_client_info": {
+          "package_name": "com.nemetz.ble2cloud"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "111356498878-ljest60cc6i1o7lclfmpl5bcl71jkue5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nemetz.ble2cloud",
+            "certificate_hash": "0d32c1c58ff4897c7d24ac72856e470ec8b4289e"
+          }
+        },
+        {
+          "client_id": "111356498878-kbjvkfse2onq8dem4m2s9elct9j7g5oi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAn7-axE5rvkSuBzPNIaZ_ZfjHzdV0Wij8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "111356498878-kbjvkfse2onq8dem4m2s9elct9j7g5oi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

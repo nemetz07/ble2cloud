@@ -9,22 +9,24 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.nemetz.ble2cloud.R
 
-class ScannerAdapter(var cellSensors: ArrayList<ScannerCell>) :
+class ScannerAdapter(val cellSensors: ArrayList<ScannerCell>) :
     RecyclerView.Adapter<ScannerAdapter.ScannerViewHolder>() {
 
-    lateinit var mClickListener: ItemClickListener
     private lateinit var context: Context
 
     interface ItemClickListener{
         fun onItemClick(view: View, position: Int)
     }
 
+    lateinit var mClickListener: ItemClickListener
+    private lateinit var enabledClickListener: ItemClickListener
+    private val disabledClickListener = object: ItemClickListener { override fun onItemClick(view: View, position: Int) {} }
+
     inner class ScannerViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
         var nameTextView: TextView = view.findViewById(R.id.sensor_name_tv)
         var addressTextView: TextView = view.findViewById(R.id.sensor_address_tv)
         var rssiTextView: TextView = view.findViewById(R.id.sensor_rssi_tv)
         var icon: ImageView = view.findViewById(R.id.sensor_icon)
-        var legacyTextView: TextView = view.findViewById(R.id.sensor_connectable)
 
         init{
             view.setOnClickListener(this)
@@ -37,7 +39,7 @@ class ScannerAdapter(var cellSensors: ArrayList<ScannerCell>) :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ScannerViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.sensor_cell, parent, false)
+            .inflate(R.layout.scanner_cell, parent, false)
 
         context = parent.context
 
@@ -53,15 +55,22 @@ class ScannerAdapter(var cellSensors: ArrayList<ScannerCell>) :
     override fun onBindViewHolder(holder: ScannerViewHolder, position: Int) {
         val scannerCell: ScannerCell = cellSensors[position]
 
-        holder.nameTextView.text = scannerCell.device.name ?: "-"
-        holder.addressTextView.text = scannerCell.device.address
+        holder.nameTextView.text = scannerCell.name
+        holder.addressTextView.text = scannerCell.address
         holder.rssiTextView.text = "${scannerCell.rssi} dB"
-//        holder.icon.src = holder.itemView.context.getString(R.string.icon_mobile)
-        holder.legacyTextView.text = if(scannerCell.isConnectable) "Connectable" else ""
     }
 
     fun setClickListener(itemClickListener: ItemClickListener){
-        mClickListener = itemClickListener
+        enabledClickListener = itemClickListener
+        enableClickListener()
+    }
+
+    fun disableClickListener(){
+        mClickListener = disabledClickListener
+    }
+
+    fun enableClickListener(){
+        mClickListener = enabledClickListener
     }
 
 }

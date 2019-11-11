@@ -23,10 +23,12 @@ object BaseAccessManager {
     const val REQUEST_ENABLE_LOCATION: Int = 1004
 
     fun isLocationEnabled(context: Context): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            (context.getSystemService(Context.LOCATION_SERVICE) as LocationManager).isLocationEnabled
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            return locationManager.isLocationEnabled
         } else {
-            TODO("VERSION.SDK_INT < P")
+            return locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
         }
     }
 

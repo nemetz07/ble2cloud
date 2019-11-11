@@ -16,4 +16,11 @@ object MyScanSettings{
         .setNumOfMatches(ScanSettings.MATCH_NUM_FEW_ADVERTISEMENT)
         .setMatchMode(ScanSettings.MATCH_MODE_STICKY)
         .build()
+
+    val SCAN_SETTINGS_MATCHONE = ScanSettings.Builder()
+        .setScanMode(ScanSettings.SCAN_MODE_BALANCED)
+        .setNumOfMatches(ScanSettings.MATCH_NUM_FEW_ADVERTISEMENT)
+        .setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE)
+//        .setCallbackType(ScanSettings.CALLBACK_TYPE_FIRST_MATCH)
+        .build()
 }

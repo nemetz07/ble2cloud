@@ -1,4 +1,4 @@
-package com.nemetz.ble2cloud.utils.receiver
+package com.nemetz.ble2cloud.receiver
 
 import android.content.BroadcastReceiver
 import android.content.ContentResolver
