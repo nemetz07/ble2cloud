@@ -1,10 +1,8 @@
 package com.nemetz.ble2cloud.data
 
 import com.google.firebase.firestore.*
-import com.nemetz.ble2cloud.ioScope
-import kotlinx.coroutines.launch
 
-class FireabaseRepo(var firestore: FirebaseFirestore) {
+class FirebaseRepo(var firestore: FirebaseFirestore) {
     private val TAG = "FIREBASE_SENSOR_REPO"
 
     private var mRegistrations: HashMap<String, ArrayList<ListenerRegistration>> = hashMapOf()

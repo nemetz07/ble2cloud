@@ -11,11 +11,11 @@
         android:id="@+id/sensorDetailNameTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:text="SENSOR_NAME"
         android:textColor="#FCFCFC"
         android:textSize="24sp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -24,13 +24,59 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
-        android:layout_marginBottom="@dimen/bottom_navbar_height"
         android:background="#FFFFFF"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/sensorDetailMapView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/sensorDetailNameTV">
 
     </ListView>
+
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/sensorDetailMapView"
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/sensorDetailBackButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="Back"
+        android:textColor="#F1F1F1"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toTopOf="@+id/chartListView"
+        app:layout_constraintEnd_toStartOf="@+id/sensorDetailNameTV"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/sensorDetailMapOverlayImageView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:contentDescription="Map overlay"
+        android:src="@drawable/map_overlay"
+        app:layout_constraintBottom_toBottomOf="@+id/sensorDetailMapView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/chartListView"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <TextView
+        android:id="@+id/sensorDetailMapOverlayTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No location data"
+        android:textColor="#CBFFFFFF"
+        android:textSize="30sp"
+        app:layout_constraintBottom_toBottomOf="@+id/sensorDetailMapView"
+        app:layout_constraintEnd_toEndOf="@+id/sensorDetailMapView"
+        app:layout_constraintStart_toStartOf="@+id/sensorDetailMapView"
+        app:layout_constraintTop_toBottomOf="@+id/chartListView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -13,11 +13,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.nemetz.ble2cloud.BLE2CloudApplication
 import com.nemetz.ble2cloud.MainActivity
 import com.nemetz.ble2cloud.R
-import com.nemetz.ble2cloud.data.CloudConnector
-import com.nemetz.ble2cloud.data.MyDataFormat
-import com.nemetz.ble2cloud.data.MySensor
-import com.nemetz.ble2cloud.data.SensorValue
-import com.nemetz.ble2cloud.event.SensorServicesDiscoveredEvent
+import com.nemetz.ble2cloud.connection.CloudConnector
+import com.nemetz.ble2cloud.event.ServiceDiscoverEndedEvent
 import com.nemetz.ble2cloud.ui.base.BaseFragment
 import com.nemetz.ble2cloud.uiScope
 import kotlinx.android.synthetic.main.add_sensor_fragment.*
@@ -57,6 +54,8 @@ class AddSensorFragment : BaseFragment() {
     }
 
     private fun init() {
+        viewModel.myCharacteristics = (context as MainActivity).viewModel.myCharacteristics
+
         viewManager = LinearLayoutManager(context)
         viewAdapter = CharacteristicsAdapter(viewModel.characteristics)
 
@@ -73,57 +72,18 @@ class AddSensorFragment : BaseFragment() {
         addSensorDoneButton.setOnClickListener {
             if (viewModel.mySensor != null) {
                 viewModel.saveSensor(cloudConnector)
-                findNavController().navigateUp()
+                AddSensorFragmentDirections.actionAddSensorFragmentToActionSensors()
+                    .also { findNavController().navigate(it) }
             }
         }
     }
 
     @Subscribe
-    fun onSensorServicesDiscovered(event: SensorServicesDiscoveredEvent) {
-        if (viewModel.services == null)
-            return
-
-        viewModel.mySensor = MySensor(
-            address = viewModel.bluetoothDevice.address,
-            name = viewModel.bluetoothDevice.name
-        )
-
-        viewModel.services!!.forEach { service ->
-            service.characteristics.forEach { characteristic ->
-                val myCharacteristic =
-                    (context as MainActivity).viewModel.getMyCharacteristic(characteristic.uuid.toString())
-                myCharacteristic?.data?.forEach { dataFormat ->
-                    val sensorValue = SensorValue(
-                        format = MyDataFormat(
-                            name = dataFormat.name,
-                            unit = dataFormat.unit,
-                            format = dataFormat.format,
-                            offset = dataFormat.offset,
-                            substring_start = dataFormat.substring_start,
-                            substring_end = dataFormat.substring_end
-                        ),
-                        uuid = myCharacteristic.uuid ?: ""
-                    )
-
-                    viewModel.characteristics.add(
-                        CharacteristicCell(
-                            name = dataFormat.name,
-                            unit = dataFormat.unit,
-                            uuid = myCharacteristic.uuid ?: "",
-                            enabled = true
-                        )
-                    )
-                    uiScope.launch {
-                        viewAdapter.notifyItemInserted(viewModel.characteristics.size - 1)
-                    }
-
-                    viewModel.mySensor!!.values.add(sensorValue)
-                }
-            }
-        }
-
+    fun onSensorServicesDiscovered(event: ServiceDiscoverEndedEvent) {
         uiScope.launch {
+            viewAdapter.notifyDataSetChanged()
             addSensorDoneButton.apply {
+                setBackgroundColor(0xFF5E9E5F.toInt())
                 text = "Done"
                 isEnabled = true
             }

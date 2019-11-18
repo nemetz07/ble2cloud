@@ -1,4 +1,4 @@
-package com.nemetz.ble2cloud.ui.sensorDetail
+package com.nemetz.ble2cloud.ui.sensorDetail.chart
 
 import android.content.Context
 import android.graphics.Typeface
@@ -12,16 +12,13 @@ import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.ChartData
 import com.github.mikephil.charting.data.LineData
 import com.nemetz.ble2cloud.R
-import com.nemetz.ble2cloud.utils.HourAxisValueFormatter
-import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
-import com.wdullaer.materialdatetimepicker.time.TimePickerDialog
-import java.util.*
 
 class LineChartItem(
     cd: ChartData<*>,
     private var referenceTimestamp: Long,
     var chartName: String,
-    private var onRangeButtonClickListener: View.OnClickListener
+    private val onRangeButtonClickListener: View.OnClickListener,
+    private val unit: String
 ) : ChartItem(cd) {
 
     private lateinit var mTf: Typeface
@@ -42,7 +39,7 @@ class LineChartItem(
         if (convertView == null) {
             holder = ViewHolder()
             convertView =
-                LayoutInflater.from(context).inflate(R.layout.list_item_linechart, parent, false)
+                LayoutInflater.from(context).inflate(R.layout.linechart_cell, parent, false)
             holder.chart = (convertView as View).findViewById(R.id.chart)
             holder.chartNameTV = convertView.findViewById(R.id.chartNameTV)
             holder.chartSetRangeButton = convertView.findViewById(R.id.chartSetRangeButton)
@@ -64,14 +61,25 @@ class LineChartItem(
         xAxis.typeface = mTf
         xAxis.setDrawGridLines(false)
         xAxis.setDrawAxisLine(true)
-        val valueFormatter = HourAxisValueFormatter(referenceTimestamp)
-        xAxis.valueFormatter = valueFormatter
+        val hourAxisValueFormatter =
+            HourAxisValueFormatter(referenceTimestamp)
+        xAxis.valueFormatter = hourAxisValueFormatter
+
+        holder.chart!!.marker =
+            MyMarkerView(
+                context,
+                R.layout.custom_chart_marker,
+                referenceTimestamp,
+                unit
+            )
 
         val leftAxis = holder.chart!!.axisLeft
         leftAxis.typeface = mTf
         leftAxis.setLabelCount(5, false)
         leftAxis.axisMinimum = mChartData.yMin * 0.9f
         leftAxis.axisMaximum = mChartData.yMax * 1.1f
+        val unitAxisValueFormatter = UnitAxisFormatter(unit)
+        leftAxis.valueFormatter = unitAxisValueFormatter
 
         // set data
         holder.chart!!.data = mChartData as LineData

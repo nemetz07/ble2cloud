@@ -1,4 +1,4 @@
-package com.nemetz.ble2cloud.ui.sensorDetail
+package com.nemetz.ble2cloud.ui.sensorDetail.chart
 
 import android.content.Context
 import android.view.View

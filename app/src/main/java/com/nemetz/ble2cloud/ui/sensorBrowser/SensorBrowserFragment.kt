@@ -1,28 +1,26 @@
 package com.nemetz.ble2cloud.ui.sensorBrowser
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.mikephil.charting.utils.Utils
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.nemetz.ble2cloud.BLE2CloudApplication
-import com.nemetz.ble2cloud.MainActivity
 import com.nemetz.ble2cloud.R
-import com.nemetz.ble2cloud.data.CloudConnector
-import com.nemetz.ble2cloud.data.FireabaseRepo
+import com.nemetz.ble2cloud.connection.CloudConnector
 import com.nemetz.ble2cloud.event.FetchCompletedEvent
 import com.nemetz.ble2cloud.ui.base.BaseFragment
-import com.nemetz.ble2cloud.uiScope
-import com.nemetz.ble2cloud.utils.Collections
+import com.nemetz.ble2cloud.ui.dialog.DeleteConfirmDialogFragment
+import com.nemetz.ble2cloud.utils.FirebaseCollections
 import kotlinx.android.synthetic.main.sensor_browser_fragment.*
-import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.Subscribe
 
 class SensorBrowserFragment : BaseFragment() {
@@ -38,7 +36,6 @@ class SensorBrowserFragment : BaseFragment() {
     private lateinit var viewManager: RecyclerView.LayoutManager
 
     private lateinit var cloudConnector: CloudConnector
-    private lateinit var firebaseSensorRepo: FireabaseRepo
     private var mRegistration: ListenerRegistration? = null
 
     override fun onCreateView(
@@ -55,31 +52,24 @@ class SensorBrowserFragment : BaseFragment() {
         init()
     }
 
-    override fun onStart() {
-        super.onStart()
-
-        mRegistration = firebaseSensorRepo.addListener(Collections.SENSORS, viewAdapter)
-    }
-
-    override fun onStop() {
-        super.onStop()
-
-        firebaseSensorRepo.removeListener(Collections.SENSORS, mRegistration)
+    override fun onDestroy() {
+        mRegistration?.remove()
+        super.onDestroy()
     }
 
     private fun init() {
         cloudConnector = (context?.applicationContext as BLE2CloudApplication).cloudConnector
-        firebaseSensorRepo = (context?.applicationContext as BLE2CloudApplication).firebaseRepo
 
         viewManager = LinearLayoutManager(context)
-        viewAdapter = SensorBrowserAdapter((context as MainActivity).viewModel.mySensors)
-
-        Utils.init(context)
+        viewAdapter = SensorBrowserAdapter()
 
         viewAdapter.setClickListener(object : SensorBrowserAdapter.ItemClickListener {
             override fun onItemClick(view: View, position: Int) {
-                val mySensor = (context as MainActivity).viewModel.mySensors[position]
-                val action = SensorBrowserFragmentDirections.actionActionSensorsToSensorDetailFragment(mySensor)
+                val mySensor = viewAdapter.cellSensors[position]
+                val action =
+                    SensorBrowserFragmentDirections.actionActionSensorsToSensorDetailFragment(
+                        mySensor
+                    )
                 findNavController().navigate(action)
             }
         })
@@ -89,15 +79,16 @@ class SensorBrowserFragment : BaseFragment() {
             adapter = viewAdapter
         }
 
-        val itemTouchHelper = ItemTouchHelper(SwipeToDeleteCallback(viewAdapter))
-        itemTouchHelper.attachToRecyclerView(sensorBrowserRecyclerView)
+        ItemTouchHelper(SwipeToDeleteCallback()).attachToRecyclerView(sensorBrowserRecyclerView)
 
         addSensorButton.setOnClickListener {
             findNavController().navigate(SensorBrowserFragmentDirections.actionActionSensorsToActionScan())
         }
+        mRegistration = FirebaseFirestore.getInstance().collection(FirebaseCollections.SENSORS)
+            .addSnapshotListener(viewAdapter)
     }
 
-    inner class SwipeToDeleteCallback(adapter: SensorBrowserAdapter) :
+    inner class SwipeToDeleteCallback :
         ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
 
         override fun onMove(
@@ -110,9 +101,16 @@ class SensorBrowserFragment : BaseFragment() {
 
         override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
             val position = viewHolder.adapterPosition
-            cloudConnector.deleteSensor((context as MainActivity).viewModel.mySensors[position].address)
+            fragmentManager?.let {
+                DeleteConfirmDialogFragment(DialogInterface.OnClickListener { _: DialogInterface, _: Int ->
+                    cloudConnector.deleteSensor(
+                        viewAdapter.cellSensors[position].address
+                    )
+                }, DialogInterface.OnClickListener { _, _ ->
+                    viewAdapter.notifyDataSetChanged()
+                }).show(it, "Delete confirm dialog")
+            }
         }
-
     }
 
     @Subscribe

@@ -1,5 +1,6 @@
 package com.nemetz.ble2cloud.ui.addSensor
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -54,6 +55,12 @@ class CharacteristicsAdapter(val cellCharacteristics: ArrayList<CharacteristicCe
         holder.nameTextView.text = characteristicCell.name
         holder.uuidTextView.text = characteristicCell.uuid
         holder.unitTextView.text = "[${characteristicCell.unit}]"
-        holder.enableSwitch.isChecked = characteristicCell.enabled
+//        holder.enableSwitch
+        holder.enableSwitch.apply {
+            isChecked = true
+            setOnCheckedChangeListener { buttonView, isChecked ->
+                characteristicCell.enabled = isChecked
+            }
+        }
     }
 }

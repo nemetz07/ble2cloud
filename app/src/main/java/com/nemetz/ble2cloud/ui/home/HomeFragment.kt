@@ -5,31 +5,27 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
+import android.widget.Button
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
-import com.nemetz.ble2cloud.BLE2CloudApplication
-import com.nemetz.ble2cloud.MainActivity
-import com.nemetz.ble2cloud.R
-import com.nemetz.ble2cloud.data.CloudConnector
-import com.nemetz.ble2cloud.data.FireabaseRepo
-import com.nemetz.ble2cloud.event.*
-import com.nemetz.ble2cloud.service.DataGatheringService
-import com.nemetz.ble2cloud.ui.base.BaseFragment
+import androidx.navigation.fragment.findNavController
+import com.nemetz.ble2cloud.*
+import com.nemetz.ble2cloud.service.DataCollectionService
 import kotlinx.android.synthetic.main.home_fragment.*
-import org.greenrobot.eventbus.Subscribe
 
-class HomeFragment : BaseFragment() {
+class HomeFragment : Fragment() {
 
-    override val TAG = "HOME_FRAGMENT"
+    private val TAG = "HOME_FRAGMENT"
 
     companion object {
         fun newInstance() = HomeFragment()
     }
 
     private lateinit var viewModel: HomeViewModel
-    private lateinit var firebaseRepo: FireabaseRepo
-    //    private var mSensorRegistration: ListenerRegistration? = null
-    private lateinit var cloudConnector: CloudConnector
+//    private lateinit var cloudConnector: CloudConnector
+
+    var stopServiceBTN: Button? = null
+    var startServiceBTN: Button? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -45,41 +41,21 @@ class HomeFragment : BaseFragment() {
         init()
     }
 
-//    override fun onStart() {
-//        super.onStart()
-//
-////        mSensorRegistration = firebaseRepo.addListener(Collections.SENSORS, this)
-//    }
-//
-//    override fun onStop() {
-//        super.onStop()
-//
-////        firebaseRepo.removeListener(Collections.SENSORS, mSensorRegistration)
-//    }
 
     private fun init() {
 //        viewModel.initCharacteristics()
 
-        firebaseRepo =
-            (context?.applicationContext as BLE2CloudApplication).firebaseRepo
+//        cloudConnector = (context?.applicationContext as BLE2CloudApplication).cloudConnector
 
-        cloudConnector = (context?.applicationContext as BLE2CloudApplication).cloudConnector
+//        startServiceButton.setOnClickListener {
+//
+////            Intent(
+////                context,
+////                DataCollectionService::class.java
+////            ).also { ContextCompat.startForegroundService(context!!, it) }
+//        }
 
-        connectToSensorsButton.setOnClickListener {
-//            viewModel.startDataGathering()
-            val serviceIntent = Intent(context, DataGatheringService::class.java)
-            ContextCompat.startForegroundService(context!!, serviceIntent)
-        }
-
-        disconnectButton.setOnClickListener {
-//            viewModel.disconnectSensors()
-            val serviceIntent = Intent(context, DataGatheringService::class.java)
-            context!!.stopService(serviceIntent)
-        }
-
-        viewModel.cloudConnector = cloudConnector
-        viewModel.sensors = (context as MainActivity).viewModel.mySensors
-        viewModel.myCharacteristics = (context as MainActivity).viewModel.myCharacteristics
+//        viewModel.myCharacteristics = (context as MainActivity).viewModel.myCharacteristics
 
 //        uploadButton.setOnClickListener {
 //            viewModel.myCharacteristics.forEach {
@@ -88,58 +64,41 @@ class HomeFragment : BaseFragment() {
 //        }
     }
 
-//    override fun onEvent(querySnapshot: QuerySnapshot?, e: FirebaseFirestoreException?) {
-//        // Handle errors
-//        if (e != null) {
-//            Log.w(TAG, "onEvent:error", e)
-//            return
-//        }
-//
-//        for (change in querySnapshot!!.documentChanges) {
-//            when (change.getPath()) {
-//                Collections.SENSORS -> {
-//                    when (change.type) {
-//                        DocumentChange.Type.ADDED -> {
-//                            onSensorAdded(change)
-//                            Log.w(TAG, "SENSOR added")
-//                        }
-//                        DocumentChange.Type.MODIFIED -> {
-//                            onSensorModified(change)
-//                            Log.w(TAG, "SENSOR modified")
-//                        }
-//                        DocumentChange.Type.REMOVED -> {
-//                            onSensorRemoved(change)
-//                            Log.w(TAG, "SENSOR removed")
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-//
-//    protected fun onSensorAdded(change: DocumentChange) {
-//        viewModel.sensors.add(change.newIndex, change.getMySensor())
-//    }
-//
-//    protected fun onSensorModified(change: DocumentChange) {
-//        if (change.oldIndex == change.newIndex) {
-//            // Item changed but remained in same position
-//            viewModel.sensors[change.oldIndex] = change.getMySensor()
-//        } else {
-//            // Item changed and changed position
-//            viewModel.sensors.removeAt(change.oldIndex)
-//            viewModel.sensors.add(change.newIndex, change.getMySensor())
-//        }
-//    }
-//
-//    protected fun onSensorRemoved(change: DocumentChange) {
-//        viewModel.sensors.removeAt(change.oldIndex)
-//    }
+    override fun onResume() {
+        super.onResume()
 
-    @Subscribe
-    fun onScanComplete(event: ScanCompleteEvent) {
-        if (context != null) {
-            viewModel.connectToSensors(context!!)
+        startServiceBTN = startServiceButton
+        stopServiceBTN = stopServiceButton
+
+        startServiceButton.apply {
+            if(isServiceRunning) {
+                text = "Resume"
+                setOnClickListener {
+                    findNavController().navigate(R.id.action_global_dataCollectionFragment)
+                }
+            } else {
+                text = "Start"
+                setOnClickListener {
+                    HomeFragmentDirections.actionActionHomeToDataCollectionOptionsFragment().also { findNavController().navigate(it) }
+                }
+            }
+        }
+
+        if(isServiceRunning) {
+            stopServiceButton.isEnabled = true
+            stopServiceButton.setOnClickListener {
+                Intent(context, DataCollectionService::class.java).apply { action = "STOP" }
+                    .also { context!!.startService(it) }
+                stopServiceButton.isEnabled = false
+                stopServiceButton.setBackgroundColor(0xFFC5C5C5.toInt())
+                startServiceButton.text = "Start"
+                startServiceButton.setOnClickListener {
+                    HomeFragmentDirections.actionActionHomeToDataCollectionOptionsFragment().also { findNavController().navigate(it) }
+                }
+            }
+        } else {
+            stopServiceButton.isEnabled = false
+            stopServiceButton.setBackgroundColor(0xFFC5C5C5.toInt())
         }
     }
 }

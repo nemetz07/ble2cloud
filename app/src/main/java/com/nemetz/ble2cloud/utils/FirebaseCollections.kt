@@ -1,6 +1,6 @@
 package com.nemetz.ble2cloud.utils
 
-object Collections {
+object FirebaseCollections {
     const val SENSORS = "sensors"
     const val CHARACTERISTICS = "characteristics"
     const val DATA = "data"

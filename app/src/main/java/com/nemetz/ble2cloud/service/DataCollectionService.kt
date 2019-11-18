@@ -1,0 +1,436 @@
+package com.nemetz.ble2cloud.service
+
+import android.app.*
+import android.bluetooth.*
+import android.bluetooth.le.ScanCallback
+import android.bluetooth.le.ScanFilter
+import android.bluetooth.le.ScanResult
+import android.bluetooth.le.ScanSettings
+import android.content.Context
+import android.content.Intent
+import android.os.Build
+import android.os.IBinder
+import android.util.Log
+import androidx.core.app.NotificationCompat
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.firebase.firestore.*
+import com.nemetz.ble2cloud.MainActivity
+import com.nemetz.ble2cloud.R
+import com.nemetz.ble2cloud.connection.BLEScanner
+import com.nemetz.ble2cloud.connection.CloudConnector
+import com.nemetz.ble2cloud.connection.MyScanSettings
+import com.nemetz.ble2cloud.data.ComplexSensor
+import com.nemetz.ble2cloud.data.MyDataFormat
+import com.nemetz.ble2cloud.data.MySensor
+import com.nemetz.ble2cloud.data.SensorData
+import com.nemetz.ble2cloud.ioScope
+import com.nemetz.ble2cloud.isServiceRunning
+import com.nemetz.ble2cloud.ui.home.DESCRIPTOR_CONFIG
+import com.nemetz.ble2cloud.utils.FirebaseCollections
+import com.nemetz.ble2cloud.utils.getMySensor
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.joda.time.DateTime
+
+
+class DataCollectionService : Service(), EventListener<QuerySnapshot> {
+
+    private val TAG = "DATA_COLLECTION_SERVICE"
+    private val CHANNEL_ID = "ForegroundServiceChannel"
+    private val ACTION_STOP_SERVICE = "STOP"
+
+    private var sensors: ArrayList<MySensor> = arrayListOf()
+    private var foundSensors: ArrayList<ComplexSensor> = arrayListOf()
+    val scanFilters = arrayListOf<ScanFilter>()
+
+    private var firestore: FirebaseFirestore? = null
+    private var sensorRegistration: ListenerRegistration? = null
+    private var cloudConnector: CloudConnector? = null
+
+    private var scanEffort: String = "LOW_POWER"
+    private var scanRate: Long = 10
+    private var dataRate: Int = 5
+    private var locationRecord: Boolean = false
+
+    private var scanSettings: ScanSettings = MyScanSettings.SCAN_SETTINGS_LOW_ENERGY
+
+    private lateinit var notification: Notification
+
+    private val dataTimes: MutableMap<String, DateTime> = mutableMapOf()
+
+    private var loop: Job? = null
+
+    private var fusedLocationClient: FusedLocationProviderClient? = null
+
+    private val scanCallback = object : ScanCallback() {
+        override fun onScanResult(callbackType: Int, result: ScanResult?) {
+            if (result?.device != null) {
+                Log.d(TAG, "Sensor found!: ${result.device.address}")
+                if (!foundSensors.any { it.mySensor.address == result.device.address }) {
+                    val mySensor = sensors.find { it.address == result.device.address }!!
+
+                    foundSensors.add(
+                        ComplexSensor(
+                            mySensor = mySensor,
+                            bluetoothDevice = result.device,
+                            rssi = result.rssi
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    private val gattCallback = object : BluetoothGattCallback() {
+        override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
+            when (newState) {
+                BluetoothProfile.STATE_CONNECTED -> {
+                    Log.d(TAG, "CONNECTED to ${gatt?.device?.address}")
+                    foundSensors.find { it.bluetoothDevice.address == gatt?.device?.address }
+                        ?.bluetoothGatt = gatt
+                    gatt?.discoverServices()
+                }
+                BluetoothProfile.STATE_DISCONNECTED -> {
+                    Log.d(TAG, "DISCONNECTED from ${gatt?.device?.address}")
+                }
+            }
+        }
+
+        override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
+            when (status) {
+                BluetoothGatt.GATT_SUCCESS -> {
+                    val sensor =
+                        foundSensors.find { it.bluetoothDevice.address == gatt.device?.address }
+                            ?: return
+                    sensor.services = gatt.services
+
+                    gatt.services.forEach { service ->
+                        service.characteristics.forEach { characteristic ->
+                            if (sensor.mySensor.values.any { it.uuid == characteristic.uuid.toString() }) {
+                                characteristic.descriptors.forEach { descriptor ->
+                                    if (descriptor.uuid == DESCRIPTOR_CONFIG) {
+                                        gatt.readDescriptor(descriptor)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        override fun onDescriptorRead(
+            gatt: BluetoothGatt?,
+            descriptor: BluetoothGattDescriptor?,
+            status: Int
+        ) {
+            when (status) {
+                BluetoothGatt.GATT_SUCCESS -> {
+                    if (gatt?.device?.address != null) {
+                        foundSensors.find { it.mySensor.address == gatt.device.address }
+                            ?.enableNotification(descriptor)
+                    }
+                }
+            }
+        }
+
+        override fun onCharacteristicChanged(
+            gatt: BluetoothGatt?,
+            characteristic: BluetoothGattCharacteristic?
+        ) {
+            gatt?.device?.address?.let { dataRead(it, characteristic) }
+        }
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if ((ACTION_STOP_SERVICE == intent?.action) or isServiceRunning) {
+            Log.d(TAG, "called to cancel service")
+
+            BLEScanner.stopScan(scanCallback)
+            stopForeground(true)
+            stopSelf()
+        } else {
+            dataRate = intent?.getIntExtra("DATA_RATE", 5) ?: 5
+            scanRate = (intent?.getIntExtra("SCAN_RATE", 10) ?: 10).toLong()
+            scanEffort = intent?.getStringExtra("SCAN_EFFORT") ?: "LOW_POWER"
+            locationRecord = intent?.getBooleanExtra("LOCATION_RECORD", false) ?: false
+
+            notification = createNotification()
+
+            startForeground(1, notification)
+            startDataCollection()
+            isServiceRunning = true
+        }
+
+        return START_NOT_STICKY
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+
+        firestore = FirebaseFirestore.getInstance()
+        sensorRegistration = firestore!!.collection(FirebaseCollections.SENSORS).addSnapshotListener(this)
+        Log.d(TAG, "Listener added")
+        cloudConnector = CloudConnector(firestore!!)
+        BLEScanner.setUp(context = baseContext)
+    }
+
+    private fun startDataCollection() {
+        Log.d(
+            TAG,
+            "START with settings: EFFORT: $scanEffort, SCAN_RATE: $scanRate, DATA_RATE: $dataRate, LOCATION: $locationRecord"
+        )
+        if (locationRecord) {
+            fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        }
+
+        scanSettings = when (scanEffort) {
+            "LOW_POWER" -> MyScanSettings.SCAN_SETTINGS_LOW_ENERGY
+            "AGGRESSIVE" -> MyScanSettings.SCAN_SETTINGS_AGGRESSIVE
+            else -> MyScanSettings.SCAN_SETTINGS_LOW_ENERGY
+        }
+        loop = ioScope.launch {
+            delay(1000)
+            while (true) {
+                if (scannerTask()) {
+                    connectToSensors()
+                }
+
+                delay(10000)
+            }
+        }
+    }
+
+    private fun connectToSensors() {
+        for (sensor in foundSensors) {
+            if (!dataTimes.containsKey(sensor.mySensor.address) or (dataTimes[sensor.mySensor.address]?.isBefore(
+                    DateTime.now().minusMinutes(dataRate)
+                ) == true)
+            ) {
+                dataTimes[sensor.mySensor.address] = DateTime.now()
+                sensor.connect(baseContext, gattCallback)
+            } else {
+                Log.d(TAG, "DATA already collected recently")
+            }
+        }
+    }
+
+    fun dataRead(
+        address: String,
+        characteristic: BluetoothGattCharacteristic?
+    ) {
+        val sensor = foundSensors.find { it.bluetoothDevice.address == address } ?: return
+
+        if (characteristic == null) {
+            sensor.disableNotification(characteristic)
+            sensor.disconnect()
+            return
+        }
+
+        sensor.mySensor.values.forEach { sensorValue ->
+            val data: SensorData = when (sensorValue.format?.format) {
+                "STRING" -> {
+                    processStringData(sensorValue.format!!, characteristic)
+                }
+                "UINT8", "UINT16", "UINT32", "SINT8", "SINT16", "SINT32" -> {
+                    processIntegerData(sensorValue.format!!, characteristic)
+                }
+                "FLOAT", "SFLOAT" -> {
+                    processFloatData(sensorValue.format!!, characteristic)
+                }
+                else -> {
+                    Log.d(TAG, "Invalid format: ${sensorValue.format?.format}")
+                    return
+                }
+            }
+
+            if (locationRecord) {
+                fusedLocationClient?.lastLocation?.addOnSuccessListener {
+                    data.latitude = it.latitude
+                    data.longitude = it.longitude
+                    data.sensorName = sensor.mySensor.name
+                    data.address = sensor.mySensor.address
+                    if (sensorValue.format != null) {
+                        data.name = sensorValue.format!!.name
+                        data.unit = sensorValue.format!!.unit
+                    }
+
+                    saveData(sensor.mySensor.address, sensorValue.format!!, data)
+                }
+            } else {
+                data.sensorName = sensor.mySensor.name
+                data.address = sensor.mySensor.address
+                if (sensorValue.format != null) {
+                    data.name = sensorValue.format!!.name
+                    data.unit = sensorValue.format!!.unit
+                }
+
+                saveData(sensor.mySensor.address, sensorValue.format!!, data)
+            }
+
+        }
+
+        sensor.disableNotification(characteristic)
+        sensor.disconnect()
+    }
+
+    private fun processFloatData(
+        myDataFormat: MyDataFormat,
+        characteristic: BluetoothGattCharacteristic
+    ): SensorData {
+        val data = characteristic.getFloatValue(myDataFormat.dataFormat(), myDataFormat.offset)
+
+        return SensorData(value = data.toString())
+    }
+
+    private fun processIntegerData(
+        myDataFormat: MyDataFormat,
+        characteristic: BluetoothGattCharacteristic
+    ): SensorData {
+        val data = characteristic.getIntValue(myDataFormat.dataFormat(), myDataFormat.offset)
+
+        return SensorData(value = data.toString())
+    }
+
+    private fun processStringData(
+        myDataFormat: MyDataFormat,
+        characteristic: BluetoothGattCharacteristic
+    ): SensorData {
+        val dataString = characteristic.getStringValue(myDataFormat.offset)
+        val data = if (myDataFormat.substring_end != null || myDataFormat.substring_end != 0) {
+            dataString.substring(myDataFormat.substring_start!!, myDataFormat.substring_end!!)
+        } else {
+            dataString
+        }
+
+        return SensorData(value = data)
+    }
+
+    private fun saveData(address: String, myDataFormat: MyDataFormat, data: SensorData) {
+        cloudConnector?.saveData(address, myDataFormat, data)
+    }
+
+    private suspend fun scannerTask(): Boolean {
+        sensors.forEach { sensor ->
+            if (!scanFilters.any { it.deviceAddress == sensor.address }) {
+                scanFilters.add(ScanFilter.Builder().setDeviceAddress(sensor.address).build())
+            }
+        }
+
+        Log.d(TAG, "Filters: $scanFilters")
+
+        return BLEScanner.scanLeDevice(
+            scanFilters,
+            scanSettings,
+            scanCallback,
+            scanRate * 1000
+        )
+    }
+
+    override fun onDestroy() {
+        loop?.cancel()
+        sensorRegistration?.remove()
+        Log.d(TAG, "Listener removed")
+        sensorRegistration = null
+        isServiceRunning = false
+
+        super.onDestroy()
+    }
+
+    override fun onBind(intent: Intent?): IBinder? {
+        return null
+    }
+
+    override fun onEvent(querySnapshot: QuerySnapshot?, exception: FirebaseFirestoreException?) {
+        // Handle errors
+        if (exception != null) {
+            Log.w(TAG, "onEvent:error", exception)
+            return
+        }
+
+        for (change in querySnapshot!!.documentChanges) {
+            when (change.type) {
+                DocumentChange.Type.ADDED -> {
+                    addSensor(change)
+                    Log.w(TAG, "SENSOR added")
+                }
+                DocumentChange.Type.MODIFIED -> {
+                    modifySensor(change)
+                    Log.w(TAG, "SENSOR modified")
+                }
+                DocumentChange.Type.REMOVED -> {
+                    removeSensor(change)
+                    Log.w(TAG, "SENSOR removed")
+                }
+            }
+        }
+    }
+
+    private fun removeSensor(change: DocumentChange?) {
+        if (change == null)
+            return
+
+        sensors.removeAt(change.oldIndex)
+    }
+
+    private fun modifySensor(change: DocumentChange?) {
+        if (change == null)
+            return
+
+        if (change.oldIndex == change.newIndex) {
+            // Item changed but remained in same position
+            sensors[change.oldIndex] = change.getMySensor()
+        } else {
+            // Item changed and changed position
+            sensors.removeAt(change.oldIndex)
+            change.getMySensor().let { sensors.add(change.newIndex, it) }
+        }
+    }
+
+    private fun addSensor(change: DocumentChange?) {
+        change?.getMySensor()?.let { sensors.add(change.newIndex, it) }
+    }
+
+    private fun createNotification(): Notification {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChannel()
+        }
+
+        val notificationIntent = Intent(this, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0)
+
+        val stopIntent = Intent(this, DataCollectionService::class.java).apply {
+            action = ACTION_STOP_SERVICE
+        }
+        val stopPendingIntent =
+            PendingIntent.getService(this, 0, stopIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+
+        return NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_cpu)
+            .setContentTitle("Bluetooth Data Collection")
+            .setContentText("Data collection in progress...")
+            .setContentIntent(pendingIntent)
+            .addAction(R.drawable.ic_dialog_close_light, "Stop", stopPendingIntent)
+            .build()
+    }
+
+    private fun createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "BLE2Cloud data collection"
+            val descriptionText = "Bluetooth data collection service"
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+                description = descriptionText
+            }
+            // Register the channel with the system
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
+}

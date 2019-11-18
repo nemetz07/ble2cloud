@@ -12,9 +12,9 @@ data class MyDataFormat(
     var offset: Int = 0,
     var substring_start: Int? = null,
     var substring_end: Int? = null
-): Parcelable {
-    fun dataFormat(): Int{
-        when(format){
+) : Parcelable {
+    fun dataFormat(): Int {
+        when (format) {
             "UINT8" -> return BluetoothGattCharacteristic.FORMAT_UINT8
             "UINT16" -> return BluetoothGattCharacteristic.FORMAT_UINT16
             "UINT32" -> return BluetoothGattCharacteristic.FORMAT_UINT32

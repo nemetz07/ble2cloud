@@ -1,6 +1,5 @@
 package com.nemetz.ble2cloud.connection
 
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
@@ -18,10 +17,16 @@ object BLEScanner {
     var isReady = false
 
     fun setUp(context: Context) {
-        bluetoothLeScanner = (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter?.bluetoothLeScanner
-        if(bluetoothLeScanner != null){
+        bluetoothLeScanner =
+            (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter?.bluetoothLeScanner
+        if (bluetoothLeScanner != null) {
+            Log.d("BLEScanner", "Scanner ready!")
             isReady = true
         }
+    }
+
+    fun stopScan(scanCallback: ScanCallback) {
+        bluetoothLeScanner?.stopScan(scanCallback)
     }
 
     suspend fun scanLeDevice(
@@ -35,7 +40,7 @@ object BLEScanner {
             return false
         }
 
-        if (mScanning != true) {
+        if (!mScanning) {
             bluetoothLeScanner!!.startScan(scanFilter, scanSettings, scanCallback)
             mScanning = true
 

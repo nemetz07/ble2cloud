@@ -9,11 +9,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.firestore.*
 import com.nemetz.ble2cloud.R
 import com.nemetz.ble2cloud.data.MySensor
+import com.nemetz.ble2cloud.utils.getMySensor
 
-class SensorBrowserAdapter(private val mySensors: ArrayList<MySensor>) :
+class SensorBrowserAdapter() :
     RecyclerView.Adapter<SensorBrowserAdapter.ViewHolder>(), EventListener<QuerySnapshot> {
 
     private val TAG = "SENSOR_BROWSER_ADAPTER"
+
+    val cellSensors = arrayListOf<MySensor>()
 
     override fun onEvent(querySnapshot: QuerySnapshot?, e: FirebaseFirestoreException?) {
         // Handle errors
@@ -22,7 +25,47 @@ class SensorBrowserAdapter(private val mySensors: ArrayList<MySensor>) :
             return
         }
 
-        notifyDataSetChanged()
+        for(change in querySnapshot!!.documentChanges) {
+            when (change.type) {
+                DocumentChange.Type.ADDED -> {
+                    addSensor(change)
+                    Log.w(TAG, "SENSOR added")
+                }
+                DocumentChange.Type.MODIFIED -> {
+                    modifySensor(change)
+                    Log.w(TAG, "SENSOR modified")
+                }
+                DocumentChange.Type.REMOVED -> {
+                    removeSensor(change)
+                    Log.w(TAG, "SENSOR removed")
+                }
+            }
+        }
+    }
+
+    private fun addSensor(change: DocumentChange) {
+        change.getMySensor().let {
+            cellSensors.add(change.newIndex, it)
+        }
+
+        notifyItemInserted(change.newIndex)
+    }
+
+    fun modifySensor(change: DocumentChange) {
+        if (change.oldIndex == change.newIndex) {
+            // Item changed but remained in same position
+            cellSensors[change.oldIndex] = change.getMySensor().let { it }
+        } else {
+            // Item changed and changed position
+            cellSensors.removeAt(change.oldIndex)
+            change.getMySensor().let { cellSensors.add(change.newIndex, it) }
+            notifyItemMoved(change.oldIndex, change.newIndex)
+        }
+    }
+
+    private fun removeSensor(change: DocumentChange) {
+        cellSensors.removeAt(change.oldIndex)
+        notifyItemRemoved(change.oldIndex)
     }
 
     lateinit var mClickListener: ItemClickListener
@@ -32,7 +75,8 @@ class SensorBrowserAdapter(private val mySensors: ArrayList<MySensor>) :
     }
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
-        var sensorNameTV = view.findViewById<TextView>(R.id.sensor_browser_cell_name)
+        var sensorNameTV = view.findViewById<TextView>(R.id.sensorBrowserNameTV)
+        var sensorAddressTv = view.findViewById<TextView>(R.id.sensorBrowserAddressTV)
 
         init {
             view.setOnClickListener(this)
@@ -50,12 +94,13 @@ class SensorBrowserAdapter(private val mySensors: ArrayList<MySensor>) :
         return ViewHolder(view)
     }
 
-    override fun getItemCount() = mySensors.size
+    override fun getItemCount() = cellSensors.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
 //        val sensorBrowserCell: MySensor? = mSnapshots[position].toObject(MySensor::class.java)
-        val mySensor = mySensors[position]
+        val mySensor = cellSensors[position]
         holder.sensorNameTV.text = mySensor.name
+        holder.sensorAddressTv.text = mySensor.address
     }
 
 

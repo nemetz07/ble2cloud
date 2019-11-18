@@ -1,26 +1,23 @@
 package com.nemetz.ble2cloud.ui.sensorDetail
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.data.LineData
-import com.github.mikephil.charting.data.LineDataSet
-import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
-import com.github.mikephil.charting.utils.ColorTemplate
-import com.nemetz.ble2cloud.BLE2CloudApplication
+import com.google.android.gms.maps.MapView
+import com.google.firebase.firestore.FirebaseFirestore
 import com.nemetz.ble2cloud.R
+import com.nemetz.ble2cloud.connection.CloudConnector
 import com.nemetz.ble2cloud.event.ChartAddedEvent
+import com.nemetz.ble2cloud.event.SensorDetailMapUpdatedEvent
 import com.nemetz.ble2cloud.ui.base.BaseFragment
 import com.nemetz.ble2cloud.uiScope
 import kotlinx.android.synthetic.main.sensor_detail_fragment.*
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.Subscribe
-import java.util.*
 
 
 class SensorDetailFragment : BaseFragment() {
@@ -36,11 +33,17 @@ class SensorDetailFragment : BaseFragment() {
     private lateinit var viewModel: SensorDetailViewModel
     private lateinit var viewAdapter: ChartDataAdapter
 
+    private lateinit var mapView: MapView
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.sensor_detail_fragment, container, false)
+        val view = inflater.inflate(R.layout.sensor_detail_fragment, container, false)
+        mapView = view.findViewById(R.id.sensorDetailMapView)
+        mapView.onCreate(savedInstanceState)
+
+        return view
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -48,6 +51,31 @@ class SensorDetailFragment : BaseFragment() {
         viewModel = ViewModelProviders.of(this).get(SensorDetailViewModel::class.java)
 
         init()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        mapView.onStart()
+    }
+
+    override fun onDestroy() {
+        mapView.onDestroy()
+        super.onDestroy()
+    }
+
+    override fun onPause() {
+        mapView.onPause()
+        super.onPause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        mapView.onResume()
+    }
+
+    override fun onStop() {
+        mapView.onStop()
+        super.onStop()
     }
 
     private fun init() {
@@ -58,44 +86,17 @@ class SensorDetailFragment : BaseFragment() {
 
         sensorDetailNameTV.text = args.sensor.name
 
-        viewModel.cloudConnector = (context?.applicationContext as BLE2CloudApplication).cloudConnector
-
-        fragmentManager?.let { viewModel.fetchCharts(it) }
-    }
-
-    private fun generateDataLine(cnt: Int): LineData {
-
-        val values1 = ArrayList<Entry>()
-
-        for (i in 0..11) {
-            values1.add(Entry(i.toFloat(), ((Math.random() * 65).toInt() + 40).toFloat()))
+        sensorDetailBackButton.setOnClickListener {
+            findNavController().navigateUp()
         }
 
-        val d1 = LineDataSet(values1, "New DataSet $cnt, (1)")
-        d1.lineWidth = 2.5f
-        d1.circleRadius = 4.5f
-        d1.highLightColor = Color.rgb(244, 117, 117)
-        d1.setDrawValues(false)
-
-        val values2 = ArrayList<Entry>()
-
-        for (i in 0..11) {
-            values2.add(Entry(i.toFloat(), values1[i].y - 30))
+        viewModel.cloudConnector =
+            CloudConnector(FirebaseFirestore.getInstance())
+        if(!viewModel.isAlreadyInitialized) {
+            fragmentManager?.let { viewModel.fetchCharts(it) }
+            viewModel.isAlreadyInitialized = true
+            mapView.getMapAsync(viewModel.onMapReadyCallback)
         }
-
-        val d2 = LineDataSet(values2, "New DataSet $cnt, (2)")
-        d2.lineWidth = 2.5f
-        d2.circleRadius = 4.5f
-        d2.highLightColor = Color.rgb(244, 117, 117)
-        d2.color = ColorTemplate.VORDIPLOM_COLORS[0]
-        d2.setCircleColor(ColorTemplate.VORDIPLOM_COLORS[0])
-        d2.setDrawValues(false)
-
-        val sets = ArrayList<ILineDataSet>()
-        sets.add(d1)
-        sets.add(d2)
-
-        return LineData(sets)
     }
 
     @Subscribe
@@ -105,4 +106,11 @@ class SensorDetailFragment : BaseFragment() {
         }
     }
 
+    @Subscribe
+    fun onMapsUpdated(event: SensorDetailMapUpdatedEvent){
+        uiScope.launch {
+            sensorDetailMapOverlayImageView.visibility = View.INVISIBLE
+            sensorDetailMapOverlayTV.visibility = View.INVISIBLE
+        }
+    }
 }

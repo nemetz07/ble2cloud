@@ -9,16 +9,25 @@
 
 
     <TextView
-        android:id="@+id/sensor_browser_cell_name"
+        android:id="@+id/sensorBrowserNameTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:fontFamily="@font/open_sans"
-        android:text="Sensor Name"
+        android:text="SENSOR_NAME"
         android:textColor="#FFFFFF"
         android:textSize="30sp"
         android:visibility="visible"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/sensorBrowserAddressTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SENSOR_ADDRESS"
+        android:textColor="#C3FFFFFF"
+        android:textSize="18sp"
+        app:layout_constraintStart_toStartOf="@+id/sensorBrowserNameTV"
+        app:layout_constraintTop_toBottomOf="@+id/sensorBrowserNameTV" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -12,9 +12,9 @@ import com.nemetz.ble2cloud.event.CloseAppEvent
 import org.greenrobot.eventbus.EventBus
 
 
-@Suppress("DEPRECATION")
+//@Suppress("DEPRECATION")
 class LocationStateChangedReceiver : BroadcastReceiver() {
-    private val TAG = "LOCATION_BROADCAST_RECEIVER"
+    private val TAG = "LOCATION_BR"
 
     override fun onReceive(locContext: Context?, locIntent: Intent?) {
         val action = locIntent?.action

@@ -88,9 +88,9 @@ class ScannerFragment : BaseFragment() {
             if (viewModel.scanSensors()) {
                 uiScope.launch {
                     viewAdapter.notifyDataSetChanged()
+                    viewAdapter.enableClickListener()
+                    scannerRefresh?.isRefreshing = false
                 }
-                viewAdapter.enableClickListener()
-                scannerRefresh?.isRefreshing = false
             }
         }
     }

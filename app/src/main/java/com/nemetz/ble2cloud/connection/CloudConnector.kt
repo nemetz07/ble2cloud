@@ -1,16 +1,21 @@
-package com.nemetz.ble2cloud.data
+package com.nemetz.ble2cloud.connection
 
 import android.util.Log
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
+import com.nemetz.ble2cloud.data.MyCharacteristic
+import com.nemetz.ble2cloud.data.MyDataFormat
+import com.nemetz.ble2cloud.data.MySensor
+import com.nemetz.ble2cloud.data.SensorData
 import com.nemetz.ble2cloud.event.SensorAddedEvent
 import com.nemetz.ble2cloud.event.SensorAlreadyExistEvent
 import com.nemetz.ble2cloud.ioScope
-import com.nemetz.ble2cloud.utils.Collections
+import com.nemetz.ble2cloud.utils.FirebaseCollections
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.joda.time.DateTime
@@ -18,33 +23,11 @@ import org.joda.time.DateTime
 class CloudConnector(val firestore: FirebaseFirestore) {
     private val TAG = "CLOUD_CONNECTOR"
 
-    private var sensorsReference: CollectionReference = firestore.collection(Collections.SENSORS)
+    private var sensorsReference: CollectionReference = firestore.collection(FirebaseCollections.SENSORS)
     private var characteristicsReference: CollectionReference =
-        firestore.collection(Collections.CHARACTERISTICS)
+        firestore.collection(FirebaseCollections.CHARACTERISTICS)
 
-//    fun getDataForSensorValue(address: String, name: String): Task<QuerySnapshot> {
-//        return getDataForSensorValue(address = address, name = name, limit = 100)
-//    }
-//
-//    fun getDataForSensorValue(address: String, name: String, limit: Long): Task<QuerySnapshot> {
-//        return getDataForSensorValue(
-//            address = address,
-//            name = name,
-//            limit = limit,
-//            startDateTime = DateTime.now().minusHours(2)
-//        )
-//    }
-//
-//    fun getDataForSensorValue(
-//        address: String,
-//        name: String,
-//        limit: Long,
-//        startDateTime: DateTime
-//    ): Task<QuerySnapshot> {
-//        return getDataForSensorValue(address=address, name=name, limit=limit, startDateTime=startDateTime, endDateTime=DateTime.now())
-//    }
-
-    fun getDataForSensorValue(
+    fun getDataBetween(
         address: String,
         name: String,
         limit: Long = 25,
@@ -54,10 +37,20 @@ class CloudConnector(val firestore: FirebaseFirestore) {
         Log.d(TAG, "Start: $startTimestamp")
         Log.d(TAG, "End: $endTimestamp")
 
-        return sensorsReference.document(address).collection(Collections.VALUES).document(name)
-            .collection(Collections.DATA).orderBy("createdAt", Query.Direction.DESCENDING)
+        return sensorsReference.document(address).collection(FirebaseCollections.VALUES).document(name)
+            .collection(FirebaseCollections.DATA).orderBy("createdAt", Query.Direction.DESCENDING)
             .whereGreaterThanOrEqualTo("createdAt", startTimestamp)
             .whereLessThanOrEqualTo("createdAt", endTimestamp)
+            .limit(limit).get()
+    }
+
+    fun getData(
+        address: String,
+        name: String,
+        limit: Long = 25
+    ): Task<QuerySnapshot> {
+        return sensorsReference.document(address).collection(FirebaseCollections.VALUES).document(name)
+            .collection(FirebaseCollections.DATA).orderBy("createdAt", Query.Direction.DESCENDING)
             .limit(limit).get()
     }
 
@@ -69,12 +62,14 @@ class CloudConnector(val firestore: FirebaseFirestore) {
                         mapOf(
                             "address" to sensor.address,
                             "name" to sensor.name,
-                            "values" to sensor.values
+                            "values" to sensor.values,
+                            "createdAt" to Timestamp.now(),
+                            "createdBy" to FirebaseAuth.getInstance().uid
                         )
                     ).addOnSuccessListener {
                         Log.d(TAG, "Sensor added")
                         sensor.values.forEach { sensorValue ->
-                            sensorsReference.document(sensor.address).collection(Collections.VALUES)
+                            sensorsReference.document(sensor.address).collection(FirebaseCollections.VALUES)
                                 .document(sensorValue.format!!.name).set(
                                     mapOf(
                                         "name" to sensorValue.format!!.name,
@@ -136,7 +131,9 @@ class CloudConnector(val firestore: FirebaseFirestore) {
             characteristicsReference.document(uuid).set(
                 mapOf(
                     "uuid" to uuid,
-                    "values" to values
+                    "values" to values,
+                    "createdAt" to Timestamp.now(),
+                    "createdBy" to FirebaseAuth.getInstance().uid
                 )
             )
         }
@@ -144,8 +141,8 @@ class CloudConnector(val firestore: FirebaseFirestore) {
 
     fun saveData(address: String, myDataFormat: MyDataFormat, data: SensorData) {
         ioScope.launch {
-            sensorsReference.document(address).collection(Collections.VALUES)
-                .document(myDataFormat.name).collection(Collections.DATA).add(data)
+            sensorsReference.document(address).collection(FirebaseCollections.VALUES)
+                .document(myDataFormat.name).collection(FirebaseCollections.DATA).add(data)
                 .addOnSuccessListener {
                     Log.d(TAG, "DATA added for $address (${data.createdAt}, ${data.value})")
                 }

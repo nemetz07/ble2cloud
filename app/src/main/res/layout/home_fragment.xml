@@ -12,31 +12,31 @@
         android:id="@+id/uploadButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
         android:text="Upload to Firebase"
-        app:layout_constraintEnd_toEndOf="@+id/disconnectButton"
-        app:layout_constraintStart_toStartOf="@+id/disconnectButton"
-        app:layout_constraintTop_toBottomOf="@+id/disconnectButton" />
-
-    <Button
-        android:id="@+id/connectToSensorsButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Connect to sensors"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/disconnectButton"
+        android:id="@+id/startServiceButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Disconnect"
-        app:layout_constraintEnd_toEndOf="@+id/connectToSensorsButton"
-        app:layout_constraintStart_toStartOf="@+id/connectToSensorsButton"
-        app:layout_constraintTop_toBottomOf="@+id/connectToSensorsButton" />
+        android:layout_marginBottom="24dp"
+        android:text="Start Service"
+        app:layout_constraintBottom_toTopOf="@+id/stopServiceButton"
+        app:layout_constraintEnd_toEndOf="@+id/stopServiceButton"
+        app:layout_constraintStart_toStartOf="@+id/stopServiceButton" />
+
+    <Button
+        android:id="@+id/stopServiceButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:text="Stop Service"
+        app:layout_constraintBottom_toTopOf="@+id/uploadButton"
+        app:layout_constraintEnd_toEndOf="@+id/uploadButton"
+        app:layout_constraintStart_toStartOf="@+id/uploadButton" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -2,7 +2,7 @@ package com.nemetz.ble2cloud.connection
 
 import android.bluetooth.le.ScanSettings
 
-object MyScanSettings{
+object MyScanSettings {
 
     val SCAN_SETTINGS_AGGRESSIVE = ScanSettings.Builder()
         .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
@@ -13,13 +13,13 @@ object MyScanSettings{
 
     val SCAN_SETTINGS_LOW_ENERGY = ScanSettings.Builder()
         .setScanMode(ScanSettings.SCAN_MODE_LOW_POWER)
-        .setNumOfMatches(ScanSettings.MATCH_NUM_FEW_ADVERTISEMENT)
+        .setNumOfMatches(ScanSettings.MATCH_NUM_ONE_ADVERTISEMENT)
         .setMatchMode(ScanSettings.MATCH_MODE_STICKY)
         .build()
 
     val SCAN_SETTINGS_MATCHONE = ScanSettings.Builder()
         .setScanMode(ScanSettings.SCAN_MODE_BALANCED)
-        .setNumOfMatches(ScanSettings.MATCH_NUM_FEW_ADVERTISEMENT)
+        .setNumOfMatches(ScanSettings.MATCH_NUM_ONE_ADVERTISEMENT)
         .setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE)
 //        .setCallbackType(ScanSettings.CALLBACK_TYPE_FIRST_MATCH)
         .build()

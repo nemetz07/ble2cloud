@@ -1,3 +1,3 @@
 package com.nemetz.ble2cloud.ui.sensorBrowser
 
-class SensorBrowserCell (val name: String)
+class SensorBrowserCell (val name: String, val address: String)

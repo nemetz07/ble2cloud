@@ -9,10 +9,10 @@ import android.content.IntentSender
 import android.location.LocationManager
 import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.Task
+
 
 object BaseAccessManager {
     const val TAG = "BASE_ACCESS_MANAGER"
@@ -33,7 +33,8 @@ object BaseAccessManager {
     }
 
     fun requestLocation(context: Context) {
-        val locationRequest = LocationRequest.create().setPriority(LocationRequest.PRIORITY_LOW_POWER)
+        val locationRequest =
+            LocationRequest.create().setPriority(LocationRequest.PRIORITY_LOW_POWER)
 
         val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
 
@@ -43,11 +44,14 @@ object BaseAccessManager {
         task.addOnFailureListener { exception ->
             if (exception is ResolvableApiException) {
                 // Location settings are not satisfied, but this can be fixed
-                // by showing the user a dialog.
+                // by showing the createdBy a dialog.
                 try {
                     // Show the dialog by calling startResolutionForResult(),
                     // and check the result in onActivityResult().
-                    exception.startResolutionForResult((context as Activity), REQUEST_ENABLE_LOCATION)
+                    exception.startResolutionForResult(
+                        (context as Activity),
+                        REQUEST_ENABLE_LOCATION
+                    )
                 } catch (sendEx: IntentSender.SendIntentException) {
                     Log.d(TAG, "Exception while enabling location: $sendEx")
                 }
@@ -60,7 +64,8 @@ object BaseAccessManager {
     }
 
     fun requestBluetooth(context: Context) {
-        val btAdapter = (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter
+        val btAdapter =
+            (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter
 
         btAdapter.takeIf { !btAdapter.isEnabled }?.apply {
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)

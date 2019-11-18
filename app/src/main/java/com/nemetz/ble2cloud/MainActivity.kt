@@ -9,24 +9,27 @@ import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProviders
+import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import androidx.navigation.findNavController
 import androidx.navigation.ui.NavigationUI
+import com.firebase.ui.auth.AuthUI
+import com.firebase.ui.auth.IdpResponse
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.*
-import com.nemetz.ble2cloud.connection.BLEConnection
 import com.nemetz.ble2cloud.connection.BLEScanner
 import com.nemetz.ble2cloud.event.*
-import com.nemetz.ble2cloud.utils.Collections
+import com.nemetz.ble2cloud.receiver.BluetoothStateChangedReceiver
+import com.nemetz.ble2cloud.receiver.LocationStateChangedReceiver
+import com.nemetz.ble2cloud.service.DataCollectionService
+import com.nemetz.ble2cloud.utils.FirebaseCollections
 import com.nemetz.ble2cloud.utils.getPath
 import com.nemetz.ble2cloud.utils.manager.BaseAccessManager
 import com.nemetz.ble2cloud.utils.manager.PermissionManager
 import com.nemetz.ble2cloud.utils.manager.SharedPreferencesManager
-import com.nemetz.ble2cloud.receiver.BluetoothStateChangedReceiver
-import com.nemetz.ble2cloud.receiver.LocationStateChangedReceiver
 import kotlinx.android.synthetic.main.activity_main.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -42,10 +45,8 @@ class MainActivity : AppCompatActivity(), EventListener<QuerySnapshot> {
     private var mBTEnabled = false
     private var mLocEnabled = false
 
-    private lateinit var bleConnection: BLEConnection
     lateinit var viewModel: SharedViewModel
     private var mCharacteristicRegistration: ListenerRegistration? = null
-    private var mSensorsRegistration: ListenerRegistration? = null
 
     /* Lifecycle START */
 
@@ -54,22 +55,60 @@ class MainActivity : AppCompatActivity(), EventListener<QuerySnapshot> {
         setContentView(R.layout.activity_main)
 
         viewModel = ViewModelProviders.of(this).get(SharedViewModel::class.java)
-        bleConnection = BLEConnection(this)
-
 
         NavigationUI.setupWithNavController(
-            bottom_navbar,
-            findNavController(R.id.nav_host_fragment)
+            bottomNavbar,
+            findNavController(R.id.navHostFragment)
         )
+
+        findNavController(R.id.navHostFragment).addOnDestinationChangedListener { navController: NavController, navDestination: NavDestination, bundle: Bundle? ->
+            when (navDestination.id) {
+                R.id.dataCollectionFragment, R.id.dataCollectionOptionsFragment, R.id.scannerFragment, R.id.sensorDetailFragment -> {
+                    hideNavigationBar()
+                }
+                else -> {
+                    showNavigationBar()
+                }
+            }
+        }
+
+        EventBus.getDefault().register(this)
+        checkCurrentUser()
+    }
+
+    private fun signIn() {
+        // Choose authentication providers
+        val providers = arrayListOf(
+            AuthUI.IdpConfig.EmailBuilder().build(),
+            AuthUI.IdpConfig.GoogleBuilder().build()
+        )
+
+        // Create and launch sign-in intent
+        startActivityForResult(
+            AuthUI.getInstance()
+                .createSignInIntentBuilder()
+                .setLogo(R.mipmap.ic_launcher)
+                .setAvailableProviders(providers)
+                .build(), RC_SIGN_IN
+        )
+    }
+
+    private fun checkCurrentUser() {
+        // [START check_current_user]
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user != null) {
+            // User is signed in
+        } else {
+            signIn()
+        }
+        // [END check_current_user]
     }
 
     override fun onStart() {
         super.onStart()
-
-        EventBus.getDefault().register(this)
-
-        mCharacteristicRegistration = (application as BLE2CloudApplication).firebaseRepo.addListener(Collections.CHARACTERISTICS, this)
-        mSensorsRegistration = (application as BLE2CloudApplication).firebaseRepo.addListener(Collections.SENSORS, this)
+        mCharacteristicRegistration =
+            FirebaseFirestore.getInstance().collection(FirebaseCollections.CHARACTERISTICS)
+                .addSnapshotListener(this)
 
         if (PermissionManager.checkLocationPermission(this))
             EventBus.getDefault().post(LocationPermissionAvailableEvent())
@@ -81,11 +120,35 @@ class MainActivity : AppCompatActivity(), EventListener<QuerySnapshot> {
             unregisterReceiver(btReceiver)
             unregisterReceiver(locReceiver)
         }
+    }
 
-        (application as BLE2CloudApplication).firebaseRepo.removeListener(Collections.CHARACTERISTICS, mCharacteristicRegistration)
-        (application as BLE2CloudApplication).firebaseRepo.removeListener(Collections.SENSORS, mSensorsRegistration)
+    override fun onDestroy() {
+
+        mCharacteristicRegistration?.remove()
+//        mSensorsRegistration?.remove()
 
         EventBus.getDefault().unregister(this)
+        super.onDestroy()
+    }
+
+    fun hideNavigationBar() {
+        with(bottomNavbar) {
+            if (visibility == View.VISIBLE && alpha == 1f) {
+                animate()
+                    .alpha(0f)
+                    .withEndAction { visibility = View.GONE }
+                    .duration = 200
+            }
+        }
+    }
+
+    fun showNavigationBar() {
+        with(bottomNavbar) {
+            visibility = View.VISIBLE
+            animate()
+                .alpha(1f)
+                .duration = 200
+        }
     }
 
     override fun onRequestPermissionsResult(
@@ -128,24 +191,8 @@ class MainActivity : AppCompatActivity(), EventListener<QuerySnapshot> {
         }
 
         for (change in querySnapshot!!.documentChanges) {
-            when(change.getPath()){
-                Collections.SENSORS -> {
-                    when (change.type) {
-                        DocumentChange.Type.ADDED -> {
-                            viewModel.addSensor(change)
-                            Log.w(TAG, "SENSOR added")
-                        }
-                        DocumentChange.Type.MODIFIED -> {
-                            viewModel.modifySensor(change)
-                            Log.w(TAG, "SENSOR modified")
-                        }
-                        DocumentChange.Type.REMOVED -> {
-                            viewModel.removeSensor(change)
-                            Log.w(TAG, "SENSOR removed")
-                        }
-                    }
-                }
-                Collections.CHARACTERISTICS -> {
+            when (change.getPath()) {
+                FirebaseCollections.CHARACTERISTICS -> {
                     when (change.type) {
                         DocumentChange.Type.ADDED -> {
                             viewModel.addCharacteristic(change)
@@ -192,11 +239,29 @@ class MainActivity : AppCompatActivity(), EventListener<QuerySnapshot> {
                     EventBus.getDefault().post(CloseAppEvent())
                 }
             }
+            RC_SIGN_IN -> {
+                val response = IdpResponse.fromResultIntent(data)
+                if (resultCode == Activity.RESULT_OK) {
+                    // Successfully signed in
+                    val user = FirebaseAuth.getInstance().currentUser
+                    // ...
+                } else {
+                    if (isServiceRunning) {
+                        Intent(this, DataCollectionService::class.java).apply { action = "STOP" }
+                            .also { startService(it) }
+                    }
+                    finish()
+                    // Sign in failed. If response is null the createdBy canceled the
+                    // sign-in flow using the back button. Otherwise check
+                    // response.getError().getErrorCode() and handle the error.
+                    // ...
+                }
+            }
             else -> super.onActivityResult(requestCode, resultCode, data)
         }
     }
 
-    override fun onSupportNavigateUp() = findNavController(R.id.nav_host_fragment).navigateUp()
+    override fun onSupportNavigateUp() = findNavController(R.id.navHostFragment).navigateUp()
 
     /* Lifecycle END */
 

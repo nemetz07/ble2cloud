@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import com.nemetz.ble2cloud.ui.sensorDetail.chart.ChartItem
 
 class ChartDataAdapter(
     context: Context,

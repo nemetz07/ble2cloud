@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    tools:context=".ui.dataCollectionOptions.DataCollectionOptionsFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/dataCollectionOptionsCancelButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#D32F2F"
+            android:fontFamily="@font/open_sans"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:text="Cancel"
+            android:textSize="36sp"
+            android:typeface="sans"
+            app:cornerRadius="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/verticalGuideline"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Button
+            android:id="@+id/dataCollectionOptionsStartButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#43A047"
+            android:fontFamily="@font/open_sans"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:text="Start"
+            android:textSize="36sp"
+            android:typeface="monospace"
+            app:cornerRadius="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/verticalGuideline" />
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/verticalGuideline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.5" />
+
+        <SeekBar
+            android:id="@+id/dataCollectionOptionsScanRateSeekbar"
+            style="@style/Widget.AppCompat.SeekBar.Discrete"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="48dp"
+            android:layout_marginEnd="100dp"
+            android:max="11"
+            android:progress="1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/dataCollectionOptionsEffortSpinner" />
+
+        <SeekBar
+            android:id="@+id/dataCollectionOptionsDataRateSeekbar"
+            style="@style/Widget.AppCompat.SeekBar.Discrete"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="48dp"
+            android:max="14"
+            android:progress="4"
+            app:layout_constraintEnd_toEndOf="@+id/dataCollectionOptionsScanRateSeekbar"
+            app:layout_constraintStart_toStartOf="@+id/dataCollectionOptionsEffortSpinner"
+            app:layout_constraintTop_toBottomOf="@+id/dataCollectionOptionsScanRateSeekbar" />
+
+        <TextView
+            android:id="@+id/dataCollectionOptionsScanRateTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:text="Scan rate (seconds)"
+            app:layout_constraintBottom_toTopOf="@+id/dataCollectionOptionsScanRateSeekbar"
+            app:layout_constraintStart_toStartOf="@+id/dataCollectionOptionsScanRateSeekbar" />
+
+        <Spinner
+            android:id="@+id/dataCollectionOptionsEffortSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="64dp"
+            android:entries="@array/effortArray"
+            android:spinnerMode="dialog"
+            app:layout_constraintStart_toStartOf="@+id/dataCollectionOptionsScanRateSeekbar"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/dataCollectionOptionsEffortTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:text="Scan effort"
+            app:layout_constraintBottom_toTopOf="@+id/dataCollectionOptionsEffortSpinner"
+            app:layout_constraintStart_toStartOf="@+id/dataCollectionOptionsEffortSpinner" />
+
+        <TextView
+            android:id="@+id/dataCollectionOptionsDataRateTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:text="Data collection rate (minutes)"
+            app:layout_constraintBottom_toTopOf="@+id/dataCollectionOptionsDataRateSeekbar"
+            app:layout_constraintStart_toStartOf="@+id/dataCollectionOptionsDataRateSeekbar" />
+
+        <Switch
+            android:id="@+id/dataCollectionOptionsSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:splitTrack="false"
+            android:switchPadding="10dp"
+            android:text="OFF"
+            android:thumbTextPadding="25dp"
+            app:layout_constraintBottom_toTopOf="@+id/dataCollectionOptionsCancelButton"
+            app:layout_constraintStart_toStartOf="@+id/dataCollectionOptionsDataRateSeekbar"
+            app:layout_constraintTop_toBottomOf="@+id/dataCollectionOptionsDataRateSeekbar"
+            app:layout_constraintVertical_bias="0.39"
+            tools:checked="false" />
+
+        <TextView
+            android:id="@+id/dataCollectionOptionsSwitchTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="Location recording"
+            app:layout_constraintBottom_toTopOf="@+id/dataCollectionOptionsSwitch"
+            app:layout_constraintStart_toStartOf="@+id/dataCollectionOptionsSwitch" />
+
+        <TextView
+            android:id="@+id/dataCollectionOptionsScanRateValueTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="10 sec"
+            app:layout_constraintBottom_toBottomOf="@+id/dataCollectionOptionsScanRateSeekbar"
+            app:layout_constraintStart_toEndOf="@+id/dataCollectionOptionsScanRateSeekbar"
+            app:layout_constraintTop_toTopOf="@+id/dataCollectionOptionsScanRateSeekbar" />
+
+        <TextView
+            android:id="@+id/dataCollectionOptionsDataRateValueTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="5 min"
+            app:layout_constraintBottom_toBottomOf="@+id/dataCollectionOptionsDataRateSeekbar"
+            app:layout_constraintStart_toEndOf="@+id/dataCollectionOptionsDataRateSeekbar"
+            app:layout_constraintTop_toTopOf="@+id/dataCollectionOptionsDataRateSeekbar" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>

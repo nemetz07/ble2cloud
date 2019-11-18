@@ -1,4 +1,4 @@
-package com.nemetz.ble2cloud.utils
+package com.nemetz.ble2cloud.ui.sensorDetail.chart
 
 import com.github.mikephil.charting.formatter.ValueFormatter
 import java.text.DateFormat

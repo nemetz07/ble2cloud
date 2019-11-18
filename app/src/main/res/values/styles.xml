@@ -5,7 +5,12 @@
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorSecondary">#009688</item>
+<!--        <item name="colorSecondaryVariant">#8E24AA</item>-->
+        <item name="colorOnSecondary">#F7F7F7</item>
+        <item name="colorError">#F44336</item>
+        <item name="colorOnError">#FFFFFF</item>
         <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
     </style>
 

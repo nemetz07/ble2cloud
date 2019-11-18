@@ -21,14 +21,16 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
-        <activity android:name=".MainActivity">
+        <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyAn7-axE5rvkSuBzPNIaZ_ZfjHzdV0Wij8"/>
+        <activity
+            android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <service
-            android:name=".service.DataGatheringService"
+            android:name=".service.DataCollectionService"
             android:exported="false" />
     </application>
 

@@ -2,6 +2,8 @@
 <resources>
     <color name="colorPrimary">#7C7C7C</color>
     <color name="colorPrimaryDark">#4D4A4A</color>
-    <color name="colorAccent">#26A69A</color>
+    <color name="colorAccent">#EF5350</color>
     <color name="colorButtonSuccess">#5E9E5F</color>
+    <color name="dataCellLocal">#DCEDC8</color>
+    <color name="dataCellOnline">#E9E9E9</color>
 </resources>

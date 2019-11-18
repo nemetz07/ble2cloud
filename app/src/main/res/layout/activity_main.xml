@@ -5,7 +5,7 @@
              android:orientation="vertical">
 
     <fragment
-        android:id="@+id/nav_host_fragment"
+        android:id="@+id/navHostFragment"
         android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -17,7 +17,7 @@
         app:navGraph="@navigation/nav_graph" />
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottom_navbar"
+        android:id="@+id/bottomNavbar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/bottom_navbar_height"
         android:layout_alignParentBottom="true"
