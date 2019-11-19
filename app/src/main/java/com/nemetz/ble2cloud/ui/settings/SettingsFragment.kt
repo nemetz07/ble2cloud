@@ -11,9 +11,9 @@ import androidx.lifecycle.ViewModelProviders
 import com.bumptech.glide.Glide
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
+import com.nemetz.ble2cloud.BLE2CloudApplication
 import com.nemetz.ble2cloud.MainActivity
 import com.nemetz.ble2cloud.R
-import com.nemetz.ble2cloud.isServiceRunning
 import com.nemetz.ble2cloud.service.DataCollectionService
 import kotlinx.android.synthetic.main.settings_fragment.*
 
@@ -48,7 +48,7 @@ class SettingsFragment : Fragment() {
             context?.let { it1 ->
                 AuthUI.getInstance().signOut(it1).addOnCompleteListener {
                     Log.d("SETTINGS", "Signed out")
-                    if (isServiceRunning) {
+                    if ((context!!.applicationContext as BLE2CloudApplication).isServiceRunning.value == true) {
                         Intent(context, DataCollectionService::class.java).apply { action = "STOP" }
                             .also { context!!.startService(it) }
                     }

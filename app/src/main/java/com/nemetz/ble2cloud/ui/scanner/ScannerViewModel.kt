@@ -7,8 +7,8 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import com.nemetz.ble2cloud.connection.BLEScanner
-import com.nemetz.ble2cloud.connection.MyScanFilter
-import com.nemetz.ble2cloud.connection.MyScanSettings
+import com.nemetz.ble2cloud.connection.BLEScanFilter
+import com.nemetz.ble2cloud.connection.BLEScanSettings
 import com.nemetz.ble2cloud.data.*
 
 class ScannerViewModel : ViewModel() {
@@ -62,8 +62,8 @@ class ScannerViewModel : ViewModel() {
         complexSensors.clear()
 
         val isFinished = BLEScanner.scanLeDevice(
-            MyScanFilter.SCAN_FILTER_EMPTY,
-            MyScanSettings.SCAN_SETTINGS_LOW_ENERGY,
+            BLEScanFilter.SCAN_FILTER_EMPTY,
+            BLEScanSettings.SCAN_SETTINGS_LOW_ENERGY,
             scanCallback,
             3000
         )

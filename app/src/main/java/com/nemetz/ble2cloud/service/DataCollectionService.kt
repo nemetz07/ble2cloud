@@ -15,17 +15,15 @@ import androidx.core.app.NotificationCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.firestore.*
-import com.nemetz.ble2cloud.MainActivity
+import com.nemetz.ble2cloud.*
 import com.nemetz.ble2cloud.R
 import com.nemetz.ble2cloud.connection.BLEScanner
 import com.nemetz.ble2cloud.connection.CloudConnector
-import com.nemetz.ble2cloud.connection.MyScanSettings
+import com.nemetz.ble2cloud.connection.BLEScanSettings
 import com.nemetz.ble2cloud.data.ComplexSensor
 import com.nemetz.ble2cloud.data.BLEDataFormat
 import com.nemetz.ble2cloud.data.BLESensor
 import com.nemetz.ble2cloud.data.BLESensorData
-import com.nemetz.ble2cloud.ioScope
-import com.nemetz.ble2cloud.isServiceRunning
 import com.nemetz.ble2cloud.ui.home.DESCRIPTOR_CONFIG
 import com.nemetz.ble2cloud.utils.FirebaseCollections
 import com.nemetz.ble2cloud.utils.getMySensor
@@ -54,7 +52,7 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
     private var dataRate: Int = 5
     private var locationRecord: Boolean = false
 
-    private var scanSettings: ScanSettings = MyScanSettings.SCAN_SETTINGS_LOW_ENERGY
+    private var scanSettings: ScanSettings = BLEScanSettings.SCAN_SETTINGS_LOW_ENERGY
 
     private lateinit var notification: Notification
 
@@ -145,12 +143,14 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if ((ACTION_STOP_SERVICE == intent?.action) or isServiceRunning) {
+        if ((ACTION_STOP_SERVICE == intent?.action) or ((applicationContext as BLE2CloudApplication).isServiceRunning.value ?: false)) {
             Log.d(TAG, "called to cancel service")
 
             BLEScanner.stopScan(scanCallback)
             stopForeground(true)
             stopSelf()
+
+            (applicationContext as BLE2CloudApplication).startTime = null
         } else {
             dataRate = intent?.getIntExtra("DATA_RATE", 5) ?: 5
             scanRate = (intent?.getIntExtra("SCAN_RATE", 10) ?: 10).toLong()
@@ -161,7 +161,9 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
 
             startForeground(1, notification)
             startDataCollection()
-            isServiceRunning = true
+
+//            (applicationContext as BLE2CloudApplication).startTime = Timestamp(DateTime.now().toDate())
+            (applicationContext as BLE2CloudApplication).isServiceRunning.value = true
         }
 
         return START_NOT_STICKY
@@ -187,9 +189,9 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
         }
 
         scanSettings = when (scanEffort) {
-            "LOW_POWER" -> MyScanSettings.SCAN_SETTINGS_LOW_ENERGY
-            "AGGRESSIVE" -> MyScanSettings.SCAN_SETTINGS_AGGRESSIVE
-            else -> MyScanSettings.SCAN_SETTINGS_LOW_ENERGY
+            "LOW_POWER" -> BLEScanSettings.SCAN_SETTINGS_LOW_ENERGY
+            "AGGRESSIVE" -> BLEScanSettings.SCAN_SETTINGS_AGGRESSIVE
+            else -> BLEScanSettings.SCAN_SETTINGS_LOW_ENERGY
         }
         loop = ioScope.launch {
             delay(1000)
@@ -334,7 +336,7 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
         sensorRegistration?.remove()
         Log.d(TAG, "Listener removed")
         sensorRegistration = null
-        isServiceRunning = false
+        (applicationContext as BLE2CloudApplication).isServiceRunning.value = false
 
         super.onDestroy()
     }

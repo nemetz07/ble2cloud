@@ -12,6 +12,7 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
+import com.nemetz.ble2cloud.BLE2CloudApplication
 import com.nemetz.ble2cloud.R
 import com.nemetz.ble2cloud.event.DataCollectionAddedEvent
 import com.nemetz.ble2cloud.service.DataCollectionService
@@ -55,6 +56,12 @@ class DataCollectionFragment : BaseFragment() {
     }
 
     private fun init() {
+        val application = context!!.applicationContext as BLE2CloudApplication
+
+        if((application.isServiceRunning.value == false) or (application.startTime == null)) {
+            application.startTime = Timestamp(DateTime.now().toDate())
+        }
+
         dataCollectionBackButton.setOnClickListener {
             findNavController().navigateUp()
         }
@@ -66,15 +73,17 @@ class DataCollectionFragment : BaseFragment() {
             findNavController().navigateUp()
         }
 
-        mRegistration = FirebaseFirestore.getInstance()
-            .collectionGroup(FirebaseCollections.DATA)
-            .whereGreaterThan("createdAt", Timestamp(DateTime.now().minusSeconds(5).toDate()))
-            .orderBy("createdAt", Query.Direction.DESCENDING)
-            .addSnapshotListener(viewAdapter)
+        if(viewModel.mRegistration == null) {
+            viewModel.mRegistration = FirebaseFirestore.getInstance()
+                .collectionGroup(FirebaseCollections.DATA)
+                .whereGreaterThan("createdAt", application.startTime!!)
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .addSnapshotListener(viewAdapter)
+        }
     }
 
     override fun onDestroy() {
-        mRegistration?.remove().let { null }
+//        viewModel.mRegistration?.remove().let { null }
         super.onDestroy()
     }
 

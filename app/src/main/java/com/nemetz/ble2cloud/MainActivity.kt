@@ -10,6 +10,7 @@ import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.NavController
@@ -31,6 +32,7 @@ import com.nemetz.ble2cloud.utils.manager.BaseAccessManager
 import com.nemetz.ble2cloud.utils.manager.PermissionManager
 import com.nemetz.ble2cloud.utils.manager.SharedPreferencesManager
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
@@ -89,7 +91,7 @@ class MainActivity : AppCompatActivity(), EventListener<QuerySnapshot> {
                 .createSignInIntentBuilder()
                 .setLogo(R.mipmap.ic_launcher)
                 .setAvailableProviders(providers)
-                .build(), RC_SIGN_IN
+                .build(), REQUEST_SIGNIN
         )
     }
 
@@ -125,7 +127,6 @@ class MainActivity : AppCompatActivity(), EventListener<QuerySnapshot> {
     override fun onDestroy() {
 
         mCharacteristicRegistration?.remove()
-//        mSensorsRegistration?.remove()
 
         EventBus.getDefault().unregister(this)
         super.onDestroy()
@@ -239,14 +240,12 @@ class MainActivity : AppCompatActivity(), EventListener<QuerySnapshot> {
                     EventBus.getDefault().post(CloseAppEvent())
                 }
             }
-            RC_SIGN_IN -> {
+            REQUEST_SIGNIN -> {
                 val response = IdpResponse.fromResultIntent(data)
                 if (resultCode == Activity.RESULT_OK) {
                     // Successfully signed in
-                    val user = FirebaseAuth.getInstance().currentUser
-                    // ...
                 } else {
-                    if (isServiceRunning) {
+                    if ((application as BLE2CloudApplication).isServiceRunning.value ?: false) {
                         Intent(this, DataCollectionService::class.java).apply { action = "STOP" }
                             .also { startService(it) }
                     }
@@ -318,11 +317,6 @@ class MainActivity : AppCompatActivity(), EventListener<QuerySnapshot> {
         Log.d(TAG, "Closing app!")
 
         finish()
-    }
-
-    @Subscribe
-    fun onConnectToSensor(event: ConnectToSensor) {
-//        bleConnection.connect(event.position)
     }
 
     /* Events END */
