@@ -64,7 +64,7 @@
         tools:layout="@layout/sensor_detail_fragment" >
         <argument
             android:name="sensor"
-            app:argType="com.nemetz.ble2cloud.dataBLE.MySensor" />
+            app:argType="com.nemetz.ble2cloud.data.BLESensor" />
     </fragment>
     <fragment
         android:id="@+id/dataCollectionFragment"

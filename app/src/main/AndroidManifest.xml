@@ -21,7 +21,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
-        <meta-dataBLE android:name="com.google.android.geo.API_KEY" android:value="AIzaSyAn7-axE5rvkSuBzPNIaZ_ZfjHzdV0Wij8"/>
+        <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyAn7-axE5rvkSuBzPNIaZ_ZfjHzdV0Wij8"/>
         <activity
             android:name=".MainActivity">
             <intent-filter>
