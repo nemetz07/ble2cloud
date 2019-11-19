@@ -21,9 +21,9 @@ import com.nemetz.ble2cloud.connection.BLEScanner
 import com.nemetz.ble2cloud.connection.CloudConnector
 import com.nemetz.ble2cloud.connection.MyScanSettings
 import com.nemetz.ble2cloud.data.ComplexSensor
-import com.nemetz.ble2cloud.data.MyDataFormat
-import com.nemetz.ble2cloud.data.MySensor
-import com.nemetz.ble2cloud.data.SensorData
+import com.nemetz.ble2cloud.data.BLEDataFormat
+import com.nemetz.ble2cloud.data.BLESensor
+import com.nemetz.ble2cloud.data.BLESensorData
 import com.nemetz.ble2cloud.ioScope
 import com.nemetz.ble2cloud.isServiceRunning
 import com.nemetz.ble2cloud.ui.home.DESCRIPTOR_CONFIG
@@ -41,7 +41,7 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
     private val CHANNEL_ID = "ForegroundServiceChannel"
     private val ACTION_STOP_SERVICE = "STOP"
 
-    private var sensors: ArrayList<MySensor> = arrayListOf()
+    private var sensors: ArrayList<BLESensor> = arrayListOf()
     private var foundSensors: ArrayList<ComplexSensor> = arrayListOf()
     val scanFilters = arrayListOf<ScanFilter>()
 
@@ -68,12 +68,12 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
         override fun onScanResult(callbackType: Int, result: ScanResult?) {
             if (result?.device != null) {
                 Log.d(TAG, "Sensor found!: ${result.device.address}")
-                if (!foundSensors.any { it.mySensor.address == result.device.address }) {
+                if (!foundSensors.any { it.BLESensor.address == result.device.address }) {
                     val mySensor = sensors.find { it.address == result.device.address }!!
 
                     foundSensors.add(
                         ComplexSensor(
-                            mySensor = mySensor,
+                            BLESensor = mySensor,
                             bluetoothDevice = result.device,
                             rssi = result.rssi
                         )
@@ -108,7 +108,7 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
 
                     gatt.services.forEach { service ->
                         service.characteristics.forEach { characteristic ->
-                            if (sensor.mySensor.values.any { it.uuid == characteristic.uuid.toString() }) {
+                            if (sensor.BLESensor.values.any { it.uuid == characteristic.uuid.toString() }) {
                                 characteristic.descriptors.forEach { descriptor ->
                                     if (descriptor.uuid == DESCRIPTOR_CONFIG) {
                                         gatt.readDescriptor(descriptor)
@@ -129,7 +129,7 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
             when (status) {
                 BluetoothGatt.GATT_SUCCESS -> {
                     if (gatt?.device?.address != null) {
-                        foundSensors.find { it.mySensor.address == gatt.device.address }
+                        foundSensors.find { it.BLESensor.address == gatt.device.address }
                             ?.enableNotification(descriptor)
                     }
                 }
@@ -205,11 +205,11 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
 
     private fun connectToSensors() {
         for (sensor in foundSensors) {
-            if (!dataTimes.containsKey(sensor.mySensor.address) or (dataTimes[sensor.mySensor.address]?.isBefore(
+            if (!dataTimes.containsKey(sensor.BLESensor.address) or (dataTimes[sensor.BLESensor.address]?.isBefore(
                     DateTime.now().minusMinutes(dataRate)
                 ) == true)
             ) {
-                dataTimes[sensor.mySensor.address] = DateTime.now()
+                dataTimes[sensor.BLESensor.address] = DateTime.now()
                 sensor.connect(baseContext, gattCallback)
             } else {
                 Log.d(TAG, "DATA already collected recently")
@@ -229,8 +229,8 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
             return
         }
 
-        sensor.mySensor.values.forEach { sensorValue ->
-            val data: SensorData = when (sensorValue.format?.format) {
+        sensor.BLESensor.values.forEach { sensorValue ->
+            val dataBLE: BLESensorData = when (sensorValue.format?.format) {
                 "STRING" -> {
                     processStringData(sensorValue.format!!, characteristic)
                 }
@@ -248,26 +248,26 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
 
             if (locationRecord) {
                 fusedLocationClient?.lastLocation?.addOnSuccessListener {
-                    data.latitude = it.latitude
-                    data.longitude = it.longitude
-                    data.sensorName = sensor.mySensor.name
-                    data.address = sensor.mySensor.address
+                    dataBLE.latitude = it.latitude
+                    dataBLE.longitude = it.longitude
+                    dataBLE.sensorName = sensor.BLESensor.name
+                    dataBLE.address = sensor.BLESensor.address
                     if (sensorValue.format != null) {
-                        data.name = sensorValue.format!!.name
-                        data.unit = sensorValue.format!!.unit
+                        dataBLE.name = sensorValue.format!!.name
+                        dataBLE.unit = sensorValue.format!!.unit
                     }
 
-                    saveData(sensor.mySensor.address, sensorValue.format!!, data)
+                    saveData(sensor.BLESensor.address, sensorValue.format!!, dataBLE)
                 }
             } else {
-                data.sensorName = sensor.mySensor.name
-                data.address = sensor.mySensor.address
+                dataBLE.sensorName = sensor.BLESensor.name
+                dataBLE.address = sensor.BLESensor.address
                 if (sensorValue.format != null) {
-                    data.name = sensorValue.format!!.name
-                    data.unit = sensorValue.format!!.unit
+                    dataBLE.name = sensorValue.format!!.name
+                    dataBLE.unit = sensorValue.format!!.unit
                 }
 
-                saveData(sensor.mySensor.address, sensorValue.format!!, data)
+                saveData(sensor.BLESensor.address, sensorValue.format!!, dataBLE)
             }
 
         }
@@ -277,39 +277,39 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
     }
 
     private fun processFloatData(
-        myDataFormat: MyDataFormat,
+        BLEDataFormat: BLEDataFormat,
         characteristic: BluetoothGattCharacteristic
-    ): SensorData {
-        val data = characteristic.getFloatValue(myDataFormat.dataFormat(), myDataFormat.offset)
+    ): BLESensorData {
+        val data = characteristic.getFloatValue(BLEDataFormat.dataFormat(), BLEDataFormat.offset)
 
-        return SensorData(value = data.toString())
+        return BLESensorData(value = data.toString())
     }
 
     private fun processIntegerData(
-        myDataFormat: MyDataFormat,
+        BLEDataFormat: BLEDataFormat,
         characteristic: BluetoothGattCharacteristic
-    ): SensorData {
-        val data = characteristic.getIntValue(myDataFormat.dataFormat(), myDataFormat.offset)
+    ): BLESensorData {
+        val data = characteristic.getIntValue(BLEDataFormat.dataFormat(), BLEDataFormat.offset)
 
-        return SensorData(value = data.toString())
+        return BLESensorData(value = data.toString())
     }
 
     private fun processStringData(
-        myDataFormat: MyDataFormat,
+        BLEDataFormat: BLEDataFormat,
         characteristic: BluetoothGattCharacteristic
-    ): SensorData {
-        val dataString = characteristic.getStringValue(myDataFormat.offset)
-        val data = if (myDataFormat.substring_end != null || myDataFormat.substring_end != 0) {
-            dataString.substring(myDataFormat.substring_start!!, myDataFormat.substring_end!!)
+    ): BLESensorData {
+        val dataString = characteristic.getStringValue(BLEDataFormat.offset)
+        val data = if (BLEDataFormat.substring_end != null || BLEDataFormat.substring_end != 0) {
+            dataString.substring(BLEDataFormat.substring_start!!, BLEDataFormat.substring_end!!)
         } else {
             dataString
         }
 
-        return SensorData(value = data)
+        return BLESensorData(value = data)
     }
 
-    private fun saveData(address: String, myDataFormat: MyDataFormat, data: SensorData) {
-        cloudConnector?.saveData(address, myDataFormat, data)
+    private fun saveData(address: String, BLEDataFormat: BLEDataFormat, dataBLE: BLESensorData) {
+        cloudConnector?.saveData(address, BLEDataFormat, dataBLE)
     }
 
     private suspend fun scannerTask(): Boolean {

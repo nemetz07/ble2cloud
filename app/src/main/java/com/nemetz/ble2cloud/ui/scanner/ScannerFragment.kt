@@ -34,7 +34,7 @@ class ScannerFragment : BaseFragment() {
 
     private val mClickListener = object: ScannerAdapter.ItemClickListener {
         override fun onItemClick(view: View, position: Int) {
-//            cloudConnector.saveSensor(viewModel.complexSensors[position].mySensor)
+//            cloudConnector.saveSensor(viewModel.complexSensors[position].BLESensor)
             val device = viewModel.complexSensors[position].bluetoothDevice
             val action = ScannerFragmentDirections.actionActionScanToAddSensorFragment(device)
             findNavController().navigate(action)

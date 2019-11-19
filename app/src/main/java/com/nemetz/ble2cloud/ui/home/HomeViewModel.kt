@@ -1,8 +1,6 @@
 package com.nemetz.ble2cloud.ui.home
 
 import androidx.lifecycle.ViewModel
-import com.nemetz.ble2cloud.data.MyCharacteristic
-import com.nemetz.ble2cloud.data.MyDataFormat
 import java.util.*
 
 val HRM_SERVICE = UUID.fromString("0000180d-0000-1000-8000-00805f9b34fb")
@@ -15,15 +13,15 @@ val DESCRIPTOR_CONFIG = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
 class HomeViewModel : ViewModel() {
     private val TAG = "HOME_VIEWMODEL"
 
-//    var myCharacteristics: ArrayList<MyCharacteristic> = arrayListOf()
+//    var BLECharacteristics: ArrayList<BLECharacteristic> = arrayListOf()
 
 //    fun initCharacteristics() {
 //
-//        myCharacteristics.add(
-//            MyCharacteristic(
+//        BLECharacteristics.add(
+//            BLECharacteristic(
 //                uuid = "00002a37-0000-1000-8000-00805f9b34fb",
 //                data = arrayListOf(
-//                    MyDataFormat(
+//                    BLEDataFormat(
 //                        format = "UINT8",
 //                        offset = 1,
 //                        name = "Heart rate",
@@ -33,18 +31,18 @@ class HomeViewModel : ViewModel() {
 //            )
 //        )
 //
-//        myCharacteristics.add(
-//            MyCharacteristic(
+//        BLECharacteristics.add(
+//            BLECharacteristic(
 //                uuid = "226caa55-6476-4566-7562-66734470666d",
 //                data = arrayListOf(
-//                    MyDataFormat(
+//                    BLEDataFormat(
 //                        name = "Temperature",
 //                        unit = "C",
 //                        format = "STRING",
 //                        substring_start = 2,
 //                        substring_end = 6
 //                    ),
-//                    MyDataFormat(
+//                    BLEDataFormat(
 //                        name = "Humidity",
 //                        unit = "%",
 //                        format = "STRING",

@@ -4,7 +4,7 @@ import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class SensorValue(
-    var format: MyDataFormat? = null,
+data class BLESensorValue(
+    var format: BLEDataFormat? = null,
     var uuid: String = ""
 ) : Parcelable

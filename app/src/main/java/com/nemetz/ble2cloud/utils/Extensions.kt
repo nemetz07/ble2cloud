@@ -4,9 +4,9 @@ import android.os.ParcelUuid
 import android.util.SparseArray
 import androidx.core.util.keyIterator
 import com.google.firebase.firestore.DocumentChange
-import com.nemetz.ble2cloud.data.MyCharacteristic
-import com.nemetz.ble2cloud.data.MyDataFormat
-import com.nemetz.ble2cloud.data.MySensor
+import com.nemetz.ble2cloud.data.BLECharacteristic
+import com.nemetz.ble2cloud.data.BLEDataFormat
+import com.nemetz.ble2cloud.data.BLESensor
 import java.util.*
 
 fun SparseArray<ByteArray>.asFirestoreData(): MutableMap<String, List<Int>> {
@@ -49,27 +49,21 @@ fun List<ParcelUuid>.asFirestoreData(): List<String> {
     return arrayList
 }
 
-fun UUID.bleChararacteristic(uuid: String): UUID? {
-    if (uuid.length > 4)
-        return null
-    return UUID.fromString("0000$uuid-0000-1000-8000-00805f9b34fb")
-}
-
-fun DocumentChange.getMySensor(): MySensor {
-    val mySensor = this.document.toObject(MySensor::class.java)
+fun DocumentChange.getMySensor(): BLESensor {
+    val mySensor = this.document.toObject(BLESensor::class.java)
 
     return mySensor
 }
 
-fun DocumentChange.getMyCharacteristic(): MyCharacteristic? {
+fun DocumentChange.getMyCharacteristic(): BLECharacteristic? {
     var values: Any? = this.document.get("values") ?: return null
     values = values as Map<String, Map<String, String?>>
 
-    val data = arrayListOf<MyDataFormat>()
+    val data = arrayListOf<BLEDataFormat>()
     values.forEach { value ->
         val myDataFormat = value.value
         data.add(
-            MyDataFormat(
+            BLEDataFormat(
                 name = myDataFormat.get("name") ?: "",
                 unit = myDataFormat.get("unit") ?: "",
                 format = myDataFormat.get("format"),
@@ -80,7 +74,7 @@ fun DocumentChange.getMyCharacteristic(): MyCharacteristic? {
         )
     }
 
-    val myCharacteristic = MyCharacteristic(
+    val myCharacteristic = BLECharacteristic(
         uuid = this.document.get("uuid") as String,
         data = data
     )

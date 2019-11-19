@@ -8,7 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.firestore.*
 import com.nemetz.ble2cloud.R
-import com.nemetz.ble2cloud.data.MySensor
+import com.nemetz.ble2cloud.data.BLESensor
 import com.nemetz.ble2cloud.utils.getMySensor
 
 class SensorBrowserAdapter() :
@@ -16,7 +16,7 @@ class SensorBrowserAdapter() :
 
     private val TAG = "SENSOR_BROWSER_ADAPTER"
 
-    val cellSensors = arrayListOf<MySensor>()
+    val cellSensors = arrayListOf<BLESensor>()
 
     override fun onEvent(querySnapshot: QuerySnapshot?, e: FirebaseFirestoreException?) {
         // Handle errors
@@ -97,7 +97,7 @@ class SensorBrowserAdapter() :
     override fun getItemCount() = cellSensors.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-//        val sensorBrowserCell: MySensor? = mSnapshots[position].toObject(MySensor::class.java)
+//        val sensorBrowserCell: BLESensor? = mSnapshots[position].toObject(BLESensor::class.java)
         val mySensor = cellSensors[position]
         holder.sensorNameTV.text = mySensor.name
         holder.sensorAddressTv.text = mySensor.address

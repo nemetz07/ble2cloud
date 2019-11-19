@@ -8,10 +8,10 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
-import com.nemetz.ble2cloud.data.MyCharacteristic
-import com.nemetz.ble2cloud.data.MyDataFormat
-import com.nemetz.ble2cloud.data.MySensor
-import com.nemetz.ble2cloud.data.SensorData
+import com.nemetz.ble2cloud.data.BLECharacteristic
+import com.nemetz.ble2cloud.data.BLEDataFormat
+import com.nemetz.ble2cloud.data.BLESensor
+import com.nemetz.ble2cloud.data.BLESensorData
 import com.nemetz.ble2cloud.event.SensorAddedEvent
 import com.nemetz.ble2cloud.event.SensorAlreadyExistEvent
 import com.nemetz.ble2cloud.ioScope
@@ -54,7 +54,7 @@ class CloudConnector(val firestore: FirebaseFirestore) {
             .limit(limit).get()
     }
 
-    fun saveSensor(sensor: MySensor) {
+    fun saveSensor(sensor: BLESensor) {
         ioScope.launch {
             sensorsReference.whereEqualTo("address", sensor.address).get().addOnSuccessListener {
                 if (it.isEmpty) {
@@ -107,12 +107,12 @@ class CloudConnector(val firestore: FirebaseFirestore) {
         }
     }
 
-    fun saveCharacteristic(myCharacteristic: MyCharacteristic) {
+    fun saveCharacteristic(BLECharacteristic: BLECharacteristic) {
         ioScope.launch {
-            val uuid = myCharacteristic.uuid ?: return@launch
+            val uuid = BLECharacteristic.uuid ?: return@launch
             val values = mutableMapOf<String, Map<String, String?>>()
 
-            myCharacteristic.data.forEach { myDataFormat ->
+            BLECharacteristic.data.forEach { myDataFormat ->
                 val myMap = mutableMapOf(
                     "name" to myDataFormat.name,
                     "unit" to myDataFormat.unit,
@@ -139,12 +139,12 @@ class CloudConnector(val firestore: FirebaseFirestore) {
         }
     }
 
-    fun saveData(address: String, myDataFormat: MyDataFormat, data: SensorData) {
+    fun saveData(address: String, BLEDataFormat: BLEDataFormat, dataBLE: BLESensorData) {
         ioScope.launch {
             sensorsReference.document(address).collection(FirebaseCollections.VALUES)
-                .document(myDataFormat.name).collection(FirebaseCollections.DATA).add(data)
+                .document(BLEDataFormat.name).collection(FirebaseCollections.DATA).add(dataBLE)
                 .addOnSuccessListener {
-                    Log.d(TAG, "DATA added for $address (${data.createdAt}, ${data.value})")
+                    Log.d(TAG, "DATA added for $address (${dataBLE.createdAt}, ${dataBLE.value})")
                 }
         }
     }

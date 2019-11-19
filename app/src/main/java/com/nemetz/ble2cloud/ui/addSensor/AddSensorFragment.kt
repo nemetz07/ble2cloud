@@ -54,7 +54,7 @@ class AddSensorFragment : BaseFragment() {
     }
 
     private fun init() {
-        viewModel.myCharacteristics = (context as MainActivity).viewModel.myCharacteristics
+        viewModel.BLECharacteristics = (context as MainActivity).viewModel.BLECharacteristics
 
         viewManager = LinearLayoutManager(context)
         viewAdapter = CharacteristicsAdapter(viewModel.characteristics)
@@ -70,7 +70,7 @@ class AddSensorFragment : BaseFragment() {
         viewModel.discoverCharacteristics(context)
 
         addSensorDoneButton.setOnClickListener {
-            if (viewModel.mySensor != null) {
+            if (viewModel.BLESensor != null) {
                 viewModel.saveSensor(cloudConnector)
                 AddSensorFragmentDirections.actionAddSensorFragmentToActionSensors()
                     .also { findNavController().navigate(it) }

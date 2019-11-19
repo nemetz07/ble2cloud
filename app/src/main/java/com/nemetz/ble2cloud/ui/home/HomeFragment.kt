@@ -55,10 +55,10 @@ class HomeFragment : Fragment() {
 ////            ).also { ContextCompat.startForegroundService(context!!, it) }
 //        }
 
-//        viewModel.myCharacteristics = (context as MainActivity).viewModel.myCharacteristics
+//        viewModel.BLECharacteristics = (context as MainActivity).viewModel.BLECharacteristics
 
 //        uploadButton.setOnClickListener {
-//            viewModel.myCharacteristics.forEach {
+//            viewModel.BLECharacteristics.forEach {
 //                cloudConnector.saveCharacteristic(it)
 //            }
 //        }

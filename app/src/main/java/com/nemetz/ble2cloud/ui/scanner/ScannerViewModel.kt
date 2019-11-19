@@ -10,7 +10,6 @@ import com.nemetz.ble2cloud.connection.BLEScanner
 import com.nemetz.ble2cloud.connection.MyScanFilter
 import com.nemetz.ble2cloud.connection.MyScanSettings
 import com.nemetz.ble2cloud.data.*
-import com.nemetz.ble2cloud.utils.asFirestoreData
 
 class ScannerViewModel : ViewModel() {
     private val TAG = "SCANNER_VIEWMODEL"
@@ -26,7 +25,7 @@ class ScannerViewModel : ViewModel() {
                 if (!complexSensors.containsAddress(result.device.address)) {
                     Log.d(TAG, "SENSOR Found: $result")
 
-                    val mySensor = MySensor(
+                    val mySensor = BLESensor(
                         address = result.device.address,
                         name = result.device.name ?: "-"
                     )
@@ -39,7 +38,7 @@ class ScannerViewModel : ViewModel() {
     }
 
     private fun ArrayList<ComplexSensor>.containsAddress(address: String): Boolean {
-        return this.any{ it.mySensor.address == address }
+        return this.any{ it.BLESensor.address == address }
     }
 
     private fun ArrayList<ComplexSensor>.sortByRSSI(){
@@ -52,8 +51,8 @@ class ScannerViewModel : ViewModel() {
 
         for (sensor in complexSensors){
             cellSensors.add(ScannerCell(
-                name = sensor.mySensor.name,
-                address = sensor.mySensor.address,
+                name = sensor.BLESensor.name,
+                address = sensor.BLESensor.address,
                 rssi = sensor.rssi
             ))
         }
@@ -101,7 +100,7 @@ class ScannerViewModel : ViewModel() {
 //
 //                            for (service in gatt.services) {
 //                                Log.d(TAG, "SERVICE: ${service.uuid}")
-//                                for (characteristic in service.myCharacteristics) {
+//                                for (characteristic in service.BLECharacteristics) {
 //                                    Log.d(TAG, "    -> CHARACTERISTIC: (${characteristic.uuid})")
 //                                    for (descriptor in characteristic.descriptors) {
 //                                        Log.d(TAG, "        -> DESCRIPTOR: ${descriptor.uuid}")

@@ -5,7 +5,7 @@ import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class MyDataFormat(
+data class BLEDataFormat(
     var name: String = "-",
     var unit: String = "",
     var format: String? = null,

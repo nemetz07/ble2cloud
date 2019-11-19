@@ -15,10 +15,10 @@ class AddSensorViewModel : ViewModel() {
     lateinit var bluetoothDevice: BluetoothDevice
     var bluetoothGatt: BluetoothGatt? = null
     var services: MutableList<BluetoothGattService>? = null
-    var mySensor: MySensor? = null
+    var BLESensor: BLESensor? = null
     val characteristics: ArrayList<CharacteristicCell> = arrayListOf()
 
-    lateinit var myCharacteristics: ArrayList<MyCharacteristic>
+    lateinit var BLECharacteristics: ArrayList<BLECharacteristic>
 
     private val gattCallback = object : BluetoothGattCallback() {
         override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
@@ -48,14 +48,14 @@ class AddSensorViewModel : ViewModel() {
     }
 
     fun onServicesDiscovered() {
-        mySensor = MySensor(
+        BLESensor = BLESensor(
             name = bluetoothDevice.name,
             address = bluetoothDevice.address
         )
 
         services?.forEach {service ->
             service.characteristics.forEach {characteristic ->
-                val myCharacteristic = myCharacteristics.find { it.uuid == characteristic.uuid.toString() }
+                val myCharacteristic = BLECharacteristics.find { it.uuid == characteristic.uuid.toString() }
                 myCharacteristic?.data?.forEach { dataFormat ->
                     characteristics.add(CharacteristicCell(name = dataFormat.name, uuid = myCharacteristic.uuid ?: "-", unit = dataFormat.unit))
 
@@ -73,12 +73,12 @@ class AddSensorViewModel : ViewModel() {
     fun saveSensor(cloudConnector: CloudConnector) {
         characteristics.forEach {characteristic ->
             if(characteristic.enabled){
-                val myCharacteristic = myCharacteristics.find { it.uuid == characteristic.uuid }
+                val myCharacteristic = BLECharacteristics.find { it.uuid == characteristic.uuid }
                 val dataFormat = myCharacteristic?.data?.find { it.name == characteristic.name }
                 if(dataFormat != null){
-                    val sensorValue = SensorValue(
+                    val sensorValue = BLESensorValue(
                         uuid = characteristic.uuid,
-                        format = MyDataFormat(
+                        format = BLEDataFormat(
                             name = dataFormat.name,
                             format = dataFormat.format,
                             unit = dataFormat.unit,
@@ -88,11 +88,11 @@ class AddSensorViewModel : ViewModel() {
                         )
                     )
 
-                    mySensor?.values?.add(sensorValue)
+                    BLESensor?.values?.add(sensorValue)
                 }
             }
         }
 
-        cloudConnector.saveSensor(mySensor!!)
+        cloudConnector.saveSensor(BLESensor!!)
     }
 }

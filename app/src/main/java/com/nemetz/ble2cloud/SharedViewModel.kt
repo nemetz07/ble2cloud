@@ -2,8 +2,8 @@ package com.nemetz.ble2cloud
 
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.DocumentChange
-import com.nemetz.ble2cloud.data.MyCharacteristic
-import com.nemetz.ble2cloud.data.MySensor
+import com.nemetz.ble2cloud.data.BLECharacteristic
+import com.nemetz.ble2cloud.data.BLESensor
 import com.nemetz.ble2cloud.utils.getMyCharacteristic
 import com.nemetz.ble2cloud.utils.getMySensor
 
@@ -11,13 +11,13 @@ class SharedViewModel : ViewModel() {
 
     private val TAG = "SHARED_VIEWMODEL"
 
-    val myCharacteristics: ArrayList<MyCharacteristic> = arrayListOf()
-    val mySensors: ArrayList<MySensor> = arrayListOf()
+    val BLECharacteristics: ArrayList<BLECharacteristic> = arrayListOf()
+    val BLESensors: ArrayList<BLESensor> = arrayListOf()
 
     fun addSensor(change: DocumentChange?) {
         if (change == null)
             return
-        change.getMySensor().let { mySensors.add(change.newIndex, it) }
+        change.getMySensor().let { BLESensors.add(change.newIndex, it) }
     }
 
     fun modifySensor(change: DocumentChange?) {
@@ -26,11 +26,11 @@ class SharedViewModel : ViewModel() {
 
         if (change.oldIndex == change.newIndex) {
             // Item changed but remained in same position
-            mySensors[change.oldIndex] = change.getMySensor()
+            BLESensors[change.oldIndex] = change.getMySensor()
         } else {
             // Item changed and changed position
-            mySensors.removeAt(change.oldIndex)
-            change.getMySensor().let { mySensors.add(change.newIndex, it) }
+            BLESensors.removeAt(change.oldIndex)
+            change.getMySensor().let { BLESensors.add(change.newIndex, it) }
         }
     }
 
@@ -38,13 +38,13 @@ class SharedViewModel : ViewModel() {
         if (change == null)
             return
 
-        mySensors.removeAt(change.oldIndex)
+        BLESensors.removeAt(change.oldIndex)
     }
 
     fun addCharacteristic(change: DocumentChange?) {
         if (change == null)
             return
-        change.getMyCharacteristic()?.let { myCharacteristics.add(change.newIndex, it) }
+        change.getMyCharacteristic()?.let { BLECharacteristics.add(change.newIndex, it) }
     }
 
     fun modifyCharacteristic(change: DocumentChange?) {
@@ -53,11 +53,11 @@ class SharedViewModel : ViewModel() {
 
         if (change.oldIndex == change.newIndex) {
             // Item changed but remained in same position
-            myCharacteristics[change.oldIndex] = change.getMyCharacteristic()!!
+            BLECharacteristics[change.oldIndex] = change.getMyCharacteristic()!!
         } else {
             // Item changed and changed position
-            myCharacteristics.removeAt(change.oldIndex)
-            change.getMyCharacteristic()?.let { myCharacteristics.add(change.newIndex, it) }
+            BLECharacteristics.removeAt(change.oldIndex)
+            change.getMyCharacteristic()?.let { BLECharacteristics.add(change.newIndex, it) }
         }
     }
 
@@ -65,14 +65,14 @@ class SharedViewModel : ViewModel() {
         if (change == null)
             return
 
-        myCharacteristics.removeAt(change.oldIndex)
+        BLECharacteristics.removeAt(change.oldIndex)
     }
 
-    fun getMyCharacteristic(uuid: String): MyCharacteristic? {
-        return myCharacteristics.find { it.uuid == uuid }
+    fun getMyCharacteristic(uuid: String): BLECharacteristic? {
+        return BLECharacteristics.find { it.uuid == uuid }
     }
 
-    fun getMySensor(address: String): MySensor? {
-        return mySensors.find { it.address == address }
+    fun getMySensor(address: String): BLESensor? {
+        return BLESensors.find { it.address == address }
     }
 }

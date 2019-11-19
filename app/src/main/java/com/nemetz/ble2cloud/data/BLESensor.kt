@@ -4,8 +4,8 @@ import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class MySensor(
+data class BLESensor(
     val address: String = "",
     val name: String = "-",
-    val values: ArrayList<SensorValue> = arrayListOf()
+    val values: ArrayList<BLESensorValue> = arrayListOf()
 ) : Parcelable

@@ -20,8 +20,8 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.QuerySnapshot
 import com.nemetz.ble2cloud.SDF_FULL
 import com.nemetz.ble2cloud.connection.CloudConnector
-import com.nemetz.ble2cloud.data.MySensor
-import com.nemetz.ble2cloud.data.SensorValue
+import com.nemetz.ble2cloud.data.BLESensor
+import com.nemetz.ble2cloud.data.BLESensorValue
 import com.nemetz.ble2cloud.event.ChartAddedEvent
 import com.nemetz.ble2cloud.event.SensorDetailMapUpdatedEvent
 import com.nemetz.ble2cloud.ui.dialog.RangeDialogFragment
@@ -38,7 +38,7 @@ class SensorDetailViewModel : ViewModel() {
 
     private var TAG = "SENSOR_DETAIL_VIEWMODEL"
 
-    var sensor: MySensor? = null
+    var sensor: BLESensor? = null
     val chartItems: ArrayList<LineChartItem> = arrayListOf()
     lateinit var cloudConnector: CloudConnector
 
@@ -57,14 +57,14 @@ class SensorDetailViewModel : ViewModel() {
 
     private fun getRangeClickListener(
         fragmentManager: FragmentManager,
-        sensorValue: SensorValue
+        BLESensorValue: BLESensorValue
     ): View.OnClickListener {
         return View.OnClickListener {
             RangeDialogFragment(DialogInterface.OnClickListener { dialog: DialogInterface, which: Int ->
                 when (which) {
                     0 -> {
                         updateChart(
-                            sensorValue = sensorValue,
+                            BLESensorValue = BLESensorValue,
                             startTimestamp = Timestamp(DateTime.now().minusHours(1).toDate()),
                             endTimestamp = Timestamp(DateTime.now().toDate()),
                             fragmentManager = fragmentManager
@@ -72,7 +72,7 @@ class SensorDetailViewModel : ViewModel() {
                     }
                     1 -> {
                         updateChart(
-                            sensorValue = sensorValue,
+                            BLESensorValue = BLESensorValue,
                             startTimestamp = Timestamp(DateTime.now().minusHours(3).toDate()),
                             endTimestamp = Timestamp(DateTime.now().toDate()),
                             fragmentManager = fragmentManager
@@ -80,7 +80,7 @@ class SensorDetailViewModel : ViewModel() {
                     }
                     2 -> {
                         updateChart(
-                            sensorValue = sensorValue,
+                            BLESensorValue = BLESensorValue,
                             startTimestamp = Timestamp(DateTime.now().minusDays(1).toDate()),
                             endTimestamp = Timestamp(DateTime.now().toDate()),
                             fragmentManager = fragmentManager
@@ -102,7 +102,7 @@ class SensorDetailViewModel : ViewModel() {
                                 endDateTime.addHours(745)
 
                                 updateChart(
-                                    sensorValue = sensorValue,
+                                    BLESensorValue = BLESensorValue,
                                     startTimestamp = Timestamp(startDateTime.toDate()),
                                     endTimestamp = Timestamp(endDateTime.toDate()),
                                     fragmentManager = fragmentManager
@@ -203,17 +203,17 @@ class SensorDetailViewModel : ViewModel() {
     }
 
     private fun updateChart(
-        sensorValue: SensorValue,
+        BLESensorValue: BLESensorValue,
         startTimestamp: Timestamp,
         endTimestamp: Timestamp,
         fragmentManager: FragmentManager
     ) {
         val position =
-            chartItems.indexOf(chartItems.find { it.chartName == sensorValue.format?.name })
+            chartItems.indexOf(chartItems.find { it.chartName == BLESensorValue.format?.name })
 
         cloudConnector.getDataBetween(
             address = sensor!!.address,
-            name = sensorValue.format!!.name,
+            name = BLESensorValue.format!!.name,
             startTimestamp = startTimestamp,
             endTimestamp = endTimestamp,
             limit = 100
@@ -221,8 +221,8 @@ class SensorDetailViewModel : ViewModel() {
             chartItems.removeAt(position)
             initChart(
                 querySnapshot,
-                sensorValue,
-                getRangeClickListener(fragmentManager, sensorValue),
+                BLESensorValue,
+                getRangeClickListener(fragmentManager, BLESensorValue),
                 position
             )
             updateMap()
@@ -231,7 +231,7 @@ class SensorDetailViewModel : ViewModel() {
 
     private fun initChart(
         querySnapshot: Task<QuerySnapshot>,
-        sensorValue: SensorValue,
+        BLESensorValue: BLESensorValue,
         onRangeButtonClickListener: View.OnClickListener,
         position: Int? = null
     ) {
@@ -258,7 +258,7 @@ class SensorDetailViewModel : ViewModel() {
                 }
                 Log.d(
                     TAG,
-                    "DATA for ${sensorValue.format!!.name}: ${timestamp}, ${value}, ($latitude, $longitude)"
+                    "DATA for ${BLESensorValue.format!!.name}: ${timestamp}, ${value}, ($latitude, $longitude)"
                 )
 
                 entries.add(
@@ -269,7 +269,7 @@ class SensorDetailViewModel : ViewModel() {
                 )
             }
         }
-        val lineDataSet = LineDataSet(entries.reversed(), sensorValue.format!!.name)
+        val lineDataSet = LineDataSet(entries.reversed(), BLESensorValue.format!!.name)
         styleDataSet(lineDataSet)
 
         if (position == null) {
@@ -277,9 +277,9 @@ class SensorDetailViewModel : ViewModel() {
                 LineChartItem(
                     LineData(lineDataSet),
                     referenceTime ?: 0,
-                    sensorValue.format!!.name,
+                    BLESensorValue.format!!.name,
                     onRangeButtonClickListener,
-                    sensorValue.format!!.unit
+                    BLESensorValue.format!!.unit
                 )
             )
         } else {
@@ -288,9 +288,9 @@ class SensorDetailViewModel : ViewModel() {
                 LineChartItem(
                     LineData(lineDataSet),
                     referenceTime ?: 0,
-                    sensorValue.format!!.name,
+                    BLESensorValue.format!!.name,
                     onRangeButtonClickListener,
-                    sensorValue.format!!.unit
+                    BLESensorValue.format!!.unit
                 )
             )
         }

@@ -3,7 +3,7 @@ package com.nemetz.ble2cloud.data
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 
-data class SensorData(
+data class BLESensorData(
     val createdAt: Timestamp = Timestamp.now(),
     var createdBy: String? = FirebaseAuth.getInstance().currentUser?.uid,
     val value: String? = "0",
