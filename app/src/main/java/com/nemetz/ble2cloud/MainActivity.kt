@@ -10,7 +10,6 @@ import android.location.LocationManager
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.NavController
@@ -21,7 +20,6 @@ import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.IdpResponse
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.*
-import com.nemetz.ble2cloud.connection.BLEScanner
 import com.nemetz.ble2cloud.event.*
 import com.nemetz.ble2cloud.receiver.BluetoothStateChangedReceiver
 import com.nemetz.ble2cloud.receiver.LocationStateChangedReceiver
@@ -32,7 +30,6 @@ import com.nemetz.ble2cloud.utils.manager.BaseAccessManager
 import com.nemetz.ble2cloud.utils.manager.PermissionManager
 import com.nemetz.ble2cloud.utils.manager.SharedPreferencesManager
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
@@ -66,7 +63,7 @@ class MainActivity : AppCompatActivity(), EventListener<QuerySnapshot> {
 
         findNavController(R.id.navHostFragment).addOnDestinationChangedListener { navController: NavController, navDestination: NavDestination, bundle: Bundle? ->
             when (navDestination.id) {
-                R.id.dataCollectionFragment, R.id.dataCollectionOptionsFragment, R.id.scannerFragment, R.id.sensorDetailFragment -> {
+                R.id.dataCollectionFragment, R.id.dataCollectionOptionsFragment, R.id.scannerFragment, R.id.sensorDetailFragment, R.id.addSensorFragment -> {
                     hideNavigationBar()
                 }
                 else -> {
@@ -109,8 +106,12 @@ class MainActivity : AppCompatActivity(), EventListener<QuerySnapshot> {
 
     override fun onStart() {
         super.onStart()
-        mCharacteristicRegistration = FirebaseFirestore.getInstance().collection(FirebaseCollections.CHARACTERISTICS).addSnapshotListener(this)
-        mSensorRegistration = FirebaseFirestore.getInstance().collection(FirebaseCollections.SENSORS).addSnapshotListener(this)
+        mCharacteristicRegistration =
+            FirebaseFirestore.getInstance().collection(FirebaseCollections.CHARACTERISTICS)
+                .addSnapshotListener(this)
+        mSensorRegistration =
+            FirebaseFirestore.getInstance().collection(FirebaseCollections.SENSORS)
+                .addSnapshotListener(this)
 
         if (PermissionManager.checkLocationPermission(this))
             EventBus.getDefault().post(LocationPermissionAvailableEvent())
@@ -262,7 +263,7 @@ class MainActivity : AppCompatActivity(), EventListener<QuerySnapshot> {
                 if (resultCode == Activity.RESULT_OK) {
                     // Successfully signed in
                 } else {
-                    if ((application as BLE2CloudApplication).isServiceRunning.value ?: false) {
+                    if ((application as BLE2CloudApplication).isServiceRunning.value == true) {
                         Intent(this, DataCollectionService::class.java).apply { action = "STOP" }
                             .also { startService(it) }
                     }
@@ -322,11 +323,6 @@ class MainActivity : AppCompatActivity(), EventListener<QuerySnapshot> {
 
         registerReceiver(btReceiver, IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED))
         registerReceiver(locReceiver, IntentFilter(LocationManager.MODE_CHANGED_ACTION))
-
-        BLEScanner.setUp(this)
-        if (!BLEScanner.isReady) {
-            finish()
-        }
     }
 
     @Subscribe

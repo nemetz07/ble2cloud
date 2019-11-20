@@ -1,6 +1,5 @@
 package com.nemetz.ble2cloud.ui.addSensor
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,17 +7,17 @@ import android.widget.Switch
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.nemetz.ble2cloud.R
-import com.nemetz.ble2cloud.ui.scanner.ScannerAdapter
 
-class CharacteristicsAdapter(val cellCharacteristics: ArrayList<CharacteristicCell>): RecyclerView.Adapter<CharacteristicsAdapter.ViewHolder>() {
+class CharacteristicsAdapter(val cellCharacteristics: ArrayList<CharacteristicCell>) :
+    RecyclerView.Adapter<CharacteristicsAdapter.ViewHolder>() {
 
-    interface ItemClickListener{
+    interface ItemClickListener {
         fun onItemClick(view: View, position: Int)
     }
 
     lateinit var mClickListener: ItemClickListener
 
-    inner class ViewHolder(view: View): RecyclerView.ViewHolder(view), View.OnClickListener {
+    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
         var nameTextView = view.findViewById<TextView>(R.id.characteristicCellNameTV)
         var uuidTextView = view.findViewById<TextView>(R.id.characteristicCellUUIDTV)
         var unitTextView = view.findViewById<TextView>(R.id.characteristicCellUnitTV)

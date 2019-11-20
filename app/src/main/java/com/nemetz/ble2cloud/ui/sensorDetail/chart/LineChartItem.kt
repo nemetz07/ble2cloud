@@ -90,8 +90,8 @@ class LineChartItem(
         // holder.chart.invalidate();
         holder.chart!!.animateX(2000)
 
-        holder.chartSetRangeButton?.setOnClickListener (onRangeButtonClickListener)
-        holder.chartEditButton?.setOnClickListener (onEditButtonClickListener)
+        holder.chartSetRangeButton?.setOnClickListener(onRangeButtonClickListener)
+        holder.chartEditButton?.setOnClickListener(onEditButtonClickListener)
 
         return convertView
     }

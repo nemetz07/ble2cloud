@@ -2,10 +2,8 @@ package com.nemetz.ble2cloud.ui.sensorDetail
 
 import android.content.DialogInterface
 import android.graphics.Color
-import android.os.Build
 import android.util.Log
 import android.view.View
-import androidx.annotation.RequiresApi
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModel
 import com.github.mikephil.charting.data.Entry

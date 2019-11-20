@@ -95,7 +95,7 @@ class SensorDetailFragment : BaseFragment() {
 
         viewModel.cloudConnector =
             CloudConnector(FirebaseFirestore.getInstance())
-        if(!viewModel.isAlreadyInitialized) {
+        if (!viewModel.isAlreadyInitialized) {
             fragmentManager?.let { viewModel.fetchCharts(it) }
             viewModel.isAlreadyInitialized = true
             mapView.getMapAsync(viewModel.onMapReadyCallback)
@@ -110,7 +110,7 @@ class SensorDetailFragment : BaseFragment() {
     }
 
     @Subscribe
-    fun onMapsUpdated(event: SensorDetailMapUpdatedEvent){
+    fun onMapsUpdated(event: SensorDetailMapUpdatedEvent) {
         uiScope.launch {
             sensorDetailMapOverlayImageView.visibility = View.INVISIBLE
             sensorDetailMapOverlayTV.visibility = View.INVISIBLE

@@ -4,15 +4,21 @@ import android.bluetooth.*
 import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.nemetz.ble2cloud.connection.CloudConnector
-import com.nemetz.ble2cloud.data.*
+import com.nemetz.ble2cloud.data.BLECharacteristic
+import com.nemetz.ble2cloud.data.BLEDataFormat
+import com.nemetz.ble2cloud.data.BLESensor
+import com.nemetz.ble2cloud.data.BLESensorValue
 import com.nemetz.ble2cloud.event.ServiceDiscoverEndedEvent
 import org.greenrobot.eventbus.EventBus
+import org.joda.time.DateTime
 
 class AddSensorViewModel : ViewModel() {
 
     private val TAG = "ADD_SENSOR_VIEWMODEL"
-    lateinit var bluetoothDevice: BluetoothDevice
+    var bluetoothDevice: BluetoothDevice? = null
     var bluetoothGatt: BluetoothGatt? = null
     var services: MutableList<BluetoothGattService>? = null
     var BLESensor: BLESensor? = null
@@ -24,13 +30,13 @@ class AddSensorViewModel : ViewModel() {
         override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
             when (newState) {
                 BluetoothProfile.STATE_CONNECTED -> {
-                    Log.d(TAG, "Connected to: ${bluetoothDevice.address}")
+                    Log.d(TAG, "Connected to: ${bluetoothDevice?.address}")
                     bluetoothGatt = gatt
-                    Log.d(TAG, "Discovering services for ${bluetoothDevice.address}")
+                    Log.d(TAG, "Discovering services for ${bluetoothDevice?.address}")
                     gatt?.discoverServices()
                 }
                 BluetoothProfile.STATE_DISCONNECTED -> {
-                    Log.d(TAG, "Disconnected from: ${bluetoothDevice.address}")
+                    Log.d(TAG, "Disconnected from: ${bluetoothDevice?.address}")
                 }
             }
         }
@@ -38,7 +44,7 @@ class AddSensorViewModel : ViewModel() {
         override fun onServicesDiscovered(gatt: BluetoothGatt?, status: Int) {
             when (status) {
                 BluetoothGatt.GATT_SUCCESS -> {
-                    Log.d(TAG, "Services discovered for: ${bluetoothDevice.address}")
+                    Log.d(TAG, "Services discovered for: ${bluetoothDevice?.address}")
 
                     services = gatt?.services
                     onServicesDiscovered()
@@ -49,33 +55,43 @@ class AddSensorViewModel : ViewModel() {
 
     fun onServicesDiscovered() {
         BLESensor = BLESensor(
-            name = bluetoothDevice.name,
-            address = bluetoothDevice.address
+            name = bluetoothDevice?.name ?: "-",
+            address = bluetoothDevice?.address ?: "00:00:00:00:00:00"
         )
 
-        services?.forEach {service ->
-            service.characteristics.forEach {characteristic ->
-                val myCharacteristic = BLECharacteristics.find { it.uuid == characteristic.uuid.toString() }
+        services?.forEach { service ->
+            service.characteristics.forEach { characteristic ->
+                val myCharacteristic =
+                    BLECharacteristics.find { it.uuid == characteristic.uuid.toString() }
                 myCharacteristic?.data?.forEach { dataFormat ->
-                    characteristics.add(CharacteristicCell(name = dataFormat.name, uuid = myCharacteristic.uuid ?: "-", unit = dataFormat.unit))
+                    characteristics.add(
+                        CharacteristicCell(
+                            name = dataFormat.name,
+                            uuid = myCharacteristic.uuid ?: "-",
+                            unit = dataFormat.unit
+                        )
+                    )
 
                     EventBus.getDefault().post(ServiceDiscoverEndedEvent())
                 }
             }
         }
-
     }
 
-    fun discoverCharacteristics(context: Context?) {
-        bluetoothDevice.connectGatt(context, false, gattCallback)
+
+    fun discoverCharacteristics(context: Context) {
+        bluetoothDevice?.connectGatt(context, false, gattCallback) ?: Log.d(
+            TAG,
+            "Can't connect ot sensor because it is null"
+        )
     }
 
     fun saveSensor(cloudConnector: CloudConnector) {
-        characteristics.forEach {characteristic ->
-            if(characteristic.enabled){
+        characteristics.forEach { characteristic ->
+            if (characteristic.enabled) {
                 val myCharacteristic = BLECharacteristics.find { it.uuid == characteristic.uuid }
                 val dataFormat = myCharacteristic?.data?.find { it.name == characteristic.name }
-                if(dataFormat != null){
+                if (dataFormat != null) {
                     val sensorValue = BLESensorValue(
                         uuid = characteristic.uuid,
                         format = BLEDataFormat(
@@ -88,7 +104,11 @@ class AddSensorViewModel : ViewModel() {
                         )
                     )
 
-                    BLESensor?.values?.put(sensorValue.format?.name ?: "-", sensorValue)
+                    BLESensor?.apply {
+                        values[sensorValue.format?.name ?: "-"] = sensorValue
+                        createdAt = Timestamp(DateTime.now().toDate())
+                        createdBy = FirebaseAuth.getInstance().uid ?: "-"
+                    }
                 }
             }
         }

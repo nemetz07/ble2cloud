@@ -45,7 +45,8 @@ class DataCollectionFragment : BaseFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProviders.of(this).get(DataCollectionViewModel::class.java)
-        viewAdapter = DataCollectionAdapter(viewModel.cellData, (context as MainActivity).viewModel.sensors)
+        viewAdapter =
+            DataCollectionAdapter(viewModel.cellData, (context as MainActivity).viewModel.sensors)
         viewManager = LinearLayoutManager(context)
 
         dataCollectionRecyclerView.apply {
@@ -59,7 +60,7 @@ class DataCollectionFragment : BaseFragment() {
     private fun init() {
         val application = context!!.applicationContext as BLE2CloudApplication
 
-        if((application.isServiceRunning.value == false) or (application.startTime == null)) {
+        if ((application.isServiceRunning.value == false) or (application.startTime == null)) {
             application.startTime = Timestamp(DateTime.now().toDate())
         }
 
@@ -74,18 +75,13 @@ class DataCollectionFragment : BaseFragment() {
             findNavController().navigateUp()
         }
 
-        if(viewModel.mRegistration == null) {
+        if (viewModel.mRegistration == null) {
             viewModel.mRegistration = FirebaseFirestore.getInstance()
                 .collectionGroup(FirebaseCollections.DATA)
                 .whereGreaterThan("createdAt", application.startTime!!)
                 .orderBy("createdAt", Query.Direction.DESCENDING)
                 .addSnapshotListener(viewAdapter)
         }
-    }
-
-    override fun onDestroy() {
-//        viewModel.mRegistration?.remove().let { null }
-        super.onDestroy()
     }
 
     @Subscribe

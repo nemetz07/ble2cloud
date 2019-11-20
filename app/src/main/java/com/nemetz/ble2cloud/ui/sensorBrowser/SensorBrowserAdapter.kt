@@ -6,12 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.firestore.*
+import com.google.firebase.firestore.DocumentChange
+import com.google.firebase.firestore.EventListener
+import com.google.firebase.firestore.FirebaseFirestoreException
+import com.google.firebase.firestore.QuerySnapshot
 import com.nemetz.ble2cloud.R
 import com.nemetz.ble2cloud.data.BLESensor
 import com.nemetz.ble2cloud.utils.getBLESensor
 
-class SensorBrowserAdapter() :
+class SensorBrowserAdapter :
     RecyclerView.Adapter<SensorBrowserAdapter.ViewHolder>(), EventListener<QuerySnapshot> {
 
     private val TAG = "SENSOR_BROWSER_ADAPTER"
@@ -25,7 +28,7 @@ class SensorBrowserAdapter() :
             return
         }
 
-        for(change in querySnapshot!!.documentChanges) {
+        for (change in querySnapshot!!.documentChanges) {
             when (change.type) {
                 DocumentChange.Type.ADDED -> {
                     addSensor(change)

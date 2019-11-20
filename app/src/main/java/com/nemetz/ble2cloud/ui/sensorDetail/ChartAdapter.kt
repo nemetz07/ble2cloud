@@ -18,7 +18,7 @@ class ChartDataAdapter(
     override fun getItemViewType(position: Int): Int {
         // return the views type
         val ci = getItem(position) as ChartItem
-        return ci.itemType ?: 0
+        return ci.itemType
     }
 
     override fun getViewTypeCount(): Int {

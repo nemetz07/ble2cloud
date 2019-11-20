@@ -15,15 +15,17 @@ import androidx.core.app.NotificationCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.firestore.*
-import com.nemetz.ble2cloud.*
+import com.nemetz.ble2cloud.BLE2CloudApplication
+import com.nemetz.ble2cloud.MainActivity
 import com.nemetz.ble2cloud.R
+import com.nemetz.ble2cloud.connection.BLEScanSettings
 import com.nemetz.ble2cloud.connection.BLEScanner
 import com.nemetz.ble2cloud.connection.CloudConnector
-import com.nemetz.ble2cloud.connection.BLEScanSettings
-import com.nemetz.ble2cloud.data.ComplexSensor
 import com.nemetz.ble2cloud.data.BLEDataFormat
 import com.nemetz.ble2cloud.data.BLESensor
 import com.nemetz.ble2cloud.data.BLESensorData
+import com.nemetz.ble2cloud.data.ComplexSensor
+import com.nemetz.ble2cloud.ioScope
 import com.nemetz.ble2cloud.ui.home.DESCRIPTOR_CONFIG
 import com.nemetz.ble2cloud.utils.FirebaseCollections
 import com.nemetz.ble2cloud.utils.getBLESensor
@@ -62,16 +64,19 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
 
     private var fusedLocationClient: FusedLocationProviderClient? = null
 
+    private var bleScanner: BLEScanner? = null
+
     private val scanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult?) {
             if (result?.device != null) {
                 Log.d(TAG, "Sensor found!: ${result.device.address}")
                 if (!foundSensors.any { it.BLESensor.address == result.device.address }) {
-                    val mySensor = sensors.find { it.address == result.device.address }!!
+                    val sensor = sensors.find { it.address == result.device.address } ?: return
 
+                    Log.d(TAG, "Sensor added to foundsensors!: ${result.device.address}")
                     foundSensors.add(
                         ComplexSensor(
-                            BLESensor = mySensor,
+                            BLESensor = sensor,
                             bluetoothDevice = result.device,
                             rssi = result.rssi
                         )
@@ -145,12 +150,7 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if ((ACTION_STOP_SERVICE == intent?.action) or ((applicationContext as BLE2CloudApplication).isServiceRunning.value == true)) {
             Log.d(TAG, "called to cancel service")
-
-            BLEScanner.stopScan(scanCallback)
-            stopForeground(true)
-            stopSelf()
-
-            (applicationContext as BLE2CloudApplication).startTime = null
+            die()
         } else {
             dataRate = intent?.getIntExtra("DATA_RATE", 5) ?: 5
             scanRate = (intent?.getIntExtra("SCAN_RATE", 10) ?: 10).toLong()
@@ -169,14 +169,27 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
         return START_NOT_STICKY
     }
 
+    fun die() {
+        bleScanner?.stopScan(scanCallback)
+        stopForeground(true)
+        stopSelf()
+
+        (applicationContext as BLE2CloudApplication).startTime = null
+    }
+
     override fun onCreate() {
         super.onCreate()
 
         firestore = FirebaseFirestore.getInstance()
-        sensorRegistration = firestore!!.collection(FirebaseCollections.SENSORS).addSnapshotListener(this)
+        sensorRegistration =
+            firestore!!.collection(FirebaseCollections.SENSORS).addSnapshotListener(this)
         Log.d(TAG, "Listener added")
         cloudConnector = CloudConnector(firestore!!)
-        BLEScanner.setUp(context = baseContext)
+        bleScanner = (applicationContext as BLE2CloudApplication).bleScanner
+        if (!bleScanner!!.isReady) {
+            Log.d(TAG, "Can't start service because scanner is not initialized!")
+            die()
+        }
     }
 
     private fun startDataCollection() {
@@ -214,7 +227,7 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
                 dataTimes[sensor.BLESensor.address] = DateTime.now()
                 sensor.connect(baseContext, gattCallback)
             } else {
-                Log.d(TAG, "DATA already collected recently")
+                Log.d(TAG, "DATA already collected recently: $dataTimes")
             }
         }
     }
@@ -323,12 +336,12 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
 
         Log.d(TAG, "Filters: $scanFilters")
 
-        return BLEScanner.scanLeDevice(
+        return bleScanner?.scanLeDevice(
             scanFilters,
             scanSettings,
             scanCallback,
             scanRate * 1000
-        )
+        ) ?: false
     }
 
     override fun onDestroy() {

@@ -32,7 +32,7 @@ class AddSensorFragment : BaseFragment() {
     private lateinit var viewManager: RecyclerView.LayoutManager
     private lateinit var cloudConnector: CloudConnector
 
-    val args: AddSensorFragmentArgs by navArgs()
+    private val args: AddSensorFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -67,7 +67,6 @@ class AddSensorFragment : BaseFragment() {
         cloudConnector = (context?.applicationContext as BLE2CloudApplication).cloudConnector
         viewModel.bluetoothDevice = args.device
 
-        viewModel.discoverCharacteristics(context)
 
         addSensorDoneButton.setOnClickListener {
             if (viewModel.BLESensor != null) {
@@ -76,13 +75,15 @@ class AddSensorFragment : BaseFragment() {
                     .also { findNavController().navigate(it) }
             }
         }
+
+        viewModel.discoverCharacteristics(context!!.applicationContext)
     }
 
     @Subscribe
     fun onSensorServicesDiscovered(event: ServiceDiscoverEndedEvent) {
         uiScope.launch {
             viewAdapter.notifyDataSetChanged()
-            addSensorDoneButton.apply {
+            addSensorDoneButton?.apply {
                 setBackgroundColor(0xFF5E9E5F.toInt())
                 text = "Done"
                 isEnabled = true

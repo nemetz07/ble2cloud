@@ -34,7 +34,10 @@ class PermissionDialogFragment : DialogFragment() {
                 val settingsIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                 val uri: Uri = Uri.fromParts("package", activity?.packageName, null)
                 settingsIntent.data = uri
-                activity?.startActivityForResult(settingsIntent, PermissionManager.OPEN_SETTINGS_FOR_PERMISSION)
+                activity?.startActivityForResult(
+                    settingsIntent,
+                    PermissionManager.OPEN_SETTINGS_FOR_PERMISSION
+                )
             }
             .create()
     }

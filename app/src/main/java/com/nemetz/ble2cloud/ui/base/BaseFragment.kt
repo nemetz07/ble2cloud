@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import org.greenrobot.eventbus.EventBus
 
-open class BaseFragment: Fragment(){
+open class BaseFragment : Fragment() {
     protected open val TAG = this::class.simpleName
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -38,7 +38,11 @@ open class BaseFragment: Fragment(){
         Log.d(TAG, "onStart")
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         Log.d(TAG, "onCreateView")
         return super.onCreateView(inflater, container, savedInstanceState)
     }

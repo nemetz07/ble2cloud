@@ -10,7 +10,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
-import com.nemetz.ble2cloud.*
+import com.nemetz.ble2cloud.BLE2CloudApplication
+import com.nemetz.ble2cloud.R
 import com.nemetz.ble2cloud.service.DataCollectionService
 import kotlinx.android.synthetic.main.home_fragment.*
 
@@ -47,8 +48,8 @@ class HomeFragment : Fragment() {
 
         val application = context!!.applicationContext as BLE2CloudApplication
 
-        val serviceObserver = Observer<Boolean> {isRunning ->
-            if(isRunning) {
+        val serviceObserver = Observer<Boolean> { isRunning ->
+            if (isRunning) {
                 startServiceButton.apply {
                     text = "Resume"
                     setOnClickListener {
@@ -66,7 +67,8 @@ class HomeFragment : Fragment() {
                 startServiceButton.apply {
                     text = "Start"
                     setOnClickListener {
-                        HomeFragmentDirections.actionActionHomeToDataCollectionOptionsFragment().also { findNavController().navigate(it) }
+                        HomeFragmentDirections.actionActionHomeToDataCollectionOptionsFragment()
+                            .also { findNavController().navigate(it) }
                     }
                 }
                 stopServiceButton.apply {

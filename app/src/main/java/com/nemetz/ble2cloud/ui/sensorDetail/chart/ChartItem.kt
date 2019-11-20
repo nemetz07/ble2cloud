@@ -9,7 +9,12 @@ abstract class ChartItem internal constructor(internal var mChartData: ChartData
 
     abstract val itemType: Int
 
-    abstract fun getView(position: Int, convertView: View?, context: Context, parent: ViewGroup): View?
+    abstract fun getView(
+        position: Int,
+        convertView: View?,
+        context: Context,
+        parent: ViewGroup
+    ): View?
 
     companion object {
 

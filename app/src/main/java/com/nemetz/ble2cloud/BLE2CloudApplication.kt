@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
+import com.nemetz.ble2cloud.connection.BLEScanner
 import com.nemetz.ble2cloud.connection.CloudConnector
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,6 +34,7 @@ class BLE2CloudApplication : Application() {
 
     lateinit var firestore: FirebaseFirestore
     lateinit var cloudConnector: CloudConnector
+    lateinit var bleScanner: BLEScanner
 
     var isServiceRunning: MutableLiveData<Boolean> = MutableLiveData(false)
     var startTime: Timestamp? = null
@@ -43,9 +45,14 @@ class BLE2CloudApplication : Application() {
 
         JodaTimeAndroid.init(this)
         initFirestore()
+        initBLEScanner()
     }
 
-    private fun initFirestore(){
+    private fun initBLEScanner() {
+        bleScanner = BLEScanner(this)
+    }
+
+    private fun initFirestore() {
         firestore = FirebaseFirestore.getInstance()
         cloudConnector = CloudConnector(firestore)
     }

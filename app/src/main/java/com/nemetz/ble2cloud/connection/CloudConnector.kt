@@ -1,8 +1,6 @@
 package com.nemetz.ble2cloud.connection
 
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
@@ -59,11 +57,14 @@ class CloudConnector(val firestore: FirebaseFirestore) {
     ) {
         sensorsReference.whereEqualTo("address", address).get().addOnSuccessListener {
             if (!it.isEmpty) {
-                sensorsReference.document(address).set(mapOf("values" to mapOf(sensorValue.format?.name to sensorValue)), SetOptions.merge())
+                sensorsReference.document(address).set(
+                    mapOf("values" to mapOf(sensorValue.format?.name to sensorValue)),
+                    SetOptions.merge()
+                )
 
                 sensorsReference.document(address).collection(FirebaseCollections.VALUES).document(
                     sensorValue.format!!.name
-                ).set (mapOf("min" to sensorValue.min, "max" to sensorValue.max), SetOptions.merge())
+                ).set(mapOf("min" to sensorValue.min, "max" to sensorValue.max), SetOptions.merge())
             }
         }
     }
@@ -72,15 +73,7 @@ class CloudConnector(val firestore: FirebaseFirestore) {
         ioScope.launch {
             sensorsReference.whereEqualTo("address", sensor.address).get().addOnSuccessListener {
                 if (it.isEmpty) {
-                    sensorsReference.document(sensor.address).set(
-                        mapOf(
-                            "address" to sensor.address,
-                            "name" to sensor.name,
-                            "values" to sensor.values,
-                            "createdAt" to Timestamp.now(),
-                            "createdBy" to FirebaseAuth.getInstance().uid
-                        )
-                    ).addOnSuccessListener {
+                    sensorsReference.document(sensor.address).set(sensor).addOnSuccessListener {
                         Log.d(TAG, "Sensor added")
                         sensor.values.forEach { (name, sensorValue) ->
                             sensorsReference.document(sensor.address)
@@ -165,7 +158,10 @@ class CloudConnector(val firestore: FirebaseFirestore) {
             sensorsReference.document(address).collection(FirebaseCollections.VALUES)
                 .document(BLEDataFormat.name).collection(FirebaseCollections.DATA).add(sensorData)
                 .addOnSuccessListener {
-                    Log.d(TAG, "DATA added for $address (${sensorData.createdAt}, ${sensorData.value})")
+                    Log.d(
+                        TAG,
+                        "DATA added for $address (${sensorData.createdAt}, ${sensorData.value})"
+                    )
                 }
         }
     }

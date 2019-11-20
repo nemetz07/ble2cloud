@@ -9,19 +9,20 @@ import android.content.Context
 import android.util.Log
 import kotlinx.coroutines.delay
 
-object BLEScanner {
-    private const val SCAN_PERIOD: Long = 3000
+class BLEScanner(val context: Context) {
+    private val SCAN_PERIOD: Long = 3000
 
     private var mScanning = false
-    private var bluetoothLeScanner: BluetoothLeScanner? = null
+    private var bluetoothLeScanner: BluetoothLeScanner? =
+        (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter?.bluetoothLeScanner
     var isReady = false
 
-    fun setUp(context: Context) {
-        bluetoothLeScanner =
-            (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter?.bluetoothLeScanner
-        if (bluetoothLeScanner != null) {
-            Log.d("BLEScanner", "Scanner ready!")
-            isReady = true
+    init {
+        isReady = if (bluetoothLeScanner == null) {
+            Log.d("BLEScanner", "Scanner failed to initialize!")
+            false
+        } else {
+            true
         }
     }
 
@@ -53,3 +54,48 @@ object BLEScanner {
         return true
     }
 }
+
+//object BLEScanner {
+//    private const val SCAN_PERIOD: Long = 3000
+//
+//    private var mScanning = false
+//    private var bluetoothLeScanner: BluetoothLeScanner? = null
+//    var isReady = false
+//
+//    fun setUp(context: Context) {
+//        bluetoothLeScanner =
+//            (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter?.bluetoothLeScanner
+//        if (bluetoothLeScanner != null) {
+//            Log.d("BLEScanner", "Scanner ready!")
+//            isReady = true
+//        }
+//    }
+//
+//    fun stopScan(scanCallback: ScanCallback) {
+//        bluetoothLeScanner?.stopScan(scanCallback)
+//    }
+//
+//    suspend fun scanLeDevice(
+//        scanFilter: List<ScanFilter>,
+//        scanSettings: ScanSettings,
+//        scanCallback: ScanCallback,
+//        scanPeriod: Long = SCAN_PERIOD
+//    ): Boolean {
+//        if (bluetoothLeScanner == null) {
+//            Log.d("BLEScanner", "Scanner not initialized")
+//            return false
+//        }
+//
+//        if (!mScanning) {
+//            bluetoothLeScanner!!.startScan(scanFilter, scanSettings, scanCallback)
+//            mScanning = true
+//
+//            delay(scanPeriod)
+//
+//            bluetoothLeScanner!!.stopScan(scanCallback)
+//            mScanning = false
+//        }
+//
+//        return true
+//    }
+//}

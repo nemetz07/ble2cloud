@@ -20,9 +20,11 @@ import com.nemetz.ble2cloud.event.DataCollectionAddedEvent
 import com.nemetz.ble2cloud.utils.enums.DataCellStatus
 import org.greenrobot.eventbus.EventBus
 import java.util.*
-import kotlin.collections.ArrayList
 
-class DataCollectionAdapter(val cellData: ArrayList<DataCollectionCell>, val sensors: ArrayList<BLESensor>) :
+class DataCollectionAdapter(
+    val cellData: ArrayList<DataCollectionCell>,
+    val sensors: ArrayList<BLESensor>
+) :
     RecyclerView.Adapter<DataCollectionAdapter.ViewHolder>(), EventListener<QuerySnapshot> {
 
     private val TAG = "DATA_COLLECTION_ADAPTER"
@@ -54,16 +56,16 @@ class DataCollectionAdapter(val cellData: ArrayList<DataCollectionCell>, val sen
         val createdAt: Timestamp? = change.document.getTimestamp("createdAt")
         val createdBy: String? = change.document.getString("createdBy")
 
-        val isLocal = if(createdBy != null) createdBy == FirebaseAuth.getInstance().uid else true
+        val isLocal = if (createdBy != null) createdBy == FirebaseAuth.getInstance().uid else true
 
-        val sensor = sensors.find { it.address == address}
+        val sensor = sensors.find { it.address == address }
         val min = sensor?.values?.get(name)?.min
         val max = sensor?.values?.get(name)?.max
 
         var status = DataCellStatus.LOCAL
-        if(!isLocal) {
+        if (!isLocal) {
             status = DataCellStatus.REMOTE
-        } else if((value.toFloat() > max ?: 100) or (value.toFloat() < min ?: -100)) {
+        } else if ((value.toFloat() > max ?: 100) or (value.toFloat() < min ?: -100)) {
             status = DataCellStatus.ALERT
         }
 
@@ -71,7 +73,7 @@ class DataCollectionAdapter(val cellData: ArrayList<DataCollectionCell>, val sen
             cellData.add(
                 change.newIndex, DataCollectionCell(
                     value = "$value $unit",
-                    createdAt = SDF_TIME.format(Date().also { it.time = createdAt.seconds * 1000 } ),
+                    createdAt = SDF_TIME.format(Date().also { it.time = createdAt.seconds * 1000 }),
                     name = name.toString(),
                     sensorName = sensorName?.toString(),
                     address = address?.toString(),
@@ -101,29 +103,69 @@ class DataCollectionAdapter(val cellData: ArrayList<DataCollectionCell>, val sen
         holder.addressTV.text = cell.address
         holder.sensorNameTV.text = cell.sensorName
 
-        when(cell.status) {
+        when (cell.status) {
             DataCellStatus.LOCAL -> {
                 holder.apply {
-                    icon.setImageDrawable(this.itemView.resources.getDrawable(R.drawable.ic_smartphone, null))
-                    itemView.setBackgroundColor(this.itemView.resources.getColor(R.color.dataCellLocal, null))
+                    icon.setImageDrawable(
+                        this.itemView.resources.getDrawable(
+                            R.drawable.ic_smartphone,
+                            null
+                        )
+                    )
+                    itemView.setBackgroundColor(
+                        this.itemView.resources.getColor(
+                            R.color.dataCellLocal,
+                            null
+                        )
+                    )
                 }
             }
             DataCellStatus.REMOTE -> {
                 holder.apply {
-                    icon.setImageDrawable(this.itemView.resources.getDrawable(R.drawable.ic_globe, null))
-                    itemView.setBackgroundColor(this.itemView.resources.getColor(R.color.dataCellRemote, null))
+                    icon.setImageDrawable(
+                        this.itemView.resources.getDrawable(
+                            R.drawable.ic_globe,
+                            null
+                        )
+                    )
+                    itemView.setBackgroundColor(
+                        this.itemView.resources.getColor(
+                            R.color.dataCellRemote,
+                            null
+                        )
+                    )
                 }
             }
             DataCellStatus.ALERT -> {
                 holder.apply {
-                    icon.setImageDrawable(this.itemView.resources.getDrawable(R.drawable.ic_alert_octagon, null))
-                    itemView.setBackgroundColor(this.itemView.resources.getColor(R.color.dataCellAlert, null))
+                    icon.setImageDrawable(
+                        this.itemView.resources.getDrawable(
+                            R.drawable.ic_alert_octagon,
+                            null
+                        )
+                    )
+                    itemView.setBackgroundColor(
+                        this.itemView.resources.getColor(
+                            R.color.dataCellAlert,
+                            null
+                        )
+                    )
                 }
             }
             else -> {
                 holder.apply {
-                    icon.setImageDrawable(this.itemView.resources.getDrawable(R.drawable.ic_smartphone, null))
-                    itemView.setBackgroundColor(this.itemView.resources.getColor(R.color.dataCellLocal, null))
+                    icon.setImageDrawable(
+                        this.itemView.resources.getDrawable(
+                            R.drawable.ic_smartphone,
+                            null
+                        )
+                    )
+                    itemView.setBackgroundColor(
+                        this.itemView.resources.getColor(
+                            R.color.dataCellLocal,
+                            null
+                        )
+                    )
                 }
             }
         }
