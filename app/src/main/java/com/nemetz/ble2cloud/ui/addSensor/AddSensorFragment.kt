@@ -14,7 +14,7 @@ import com.nemetz.ble2cloud.BLE2CloudApplication
 import com.nemetz.ble2cloud.MainActivity
 import com.nemetz.ble2cloud.R
 import com.nemetz.ble2cloud.connection.CloudConnector
-import com.nemetz.ble2cloud.event.ServiceDiscoverEndedEvent
+import com.nemetz.ble2cloud.event.ServicesDiscoveredEvent
 import com.nemetz.ble2cloud.ui.base.BaseFragment
 import com.nemetz.ble2cloud.uiScope
 import kotlinx.android.synthetic.main.add_sensor_fragment.*
@@ -80,7 +80,7 @@ class AddSensorFragment : BaseFragment() {
     }
 
     @Subscribe
-    fun onSensorServicesDiscovered(event: ServiceDiscoverEndedEvent) {
+    fun onSensorServicesDiscovered(event: ServicesDiscoveredEvent) {
         uiScope.launch {
             viewAdapter.notifyDataSetChanged()
             addSensorDoneButton?.apply {

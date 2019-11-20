@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.nemetz.ble2cloud.BLE2CloudApplication
 import com.nemetz.ble2cloud.R
-import com.nemetz.ble2cloud.event.AutoConnectEvent
 import com.nemetz.ble2cloud.event.SensorAddedEvent
 import com.nemetz.ble2cloud.event.SensorAlreadyExistEvent
 import com.nemetz.ble2cloud.ioScope
@@ -117,11 +116,6 @@ class ScannerFragment : BaseFragment() {
         uiScope.launch {
             Toast.makeText(context, "Sensor already added", Toast.LENGTH_LONG).show()
         }
-    }
-
-    @Subscribe
-    fun onAutoConnect(event: AutoConnectEvent) {
-//        viewModel.autoConnect()
     }
 
 }

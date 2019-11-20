@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -15,16 +16,13 @@ import com.google.firebase.firestore.ListenerRegistration
 import com.nemetz.ble2cloud.BLE2CloudApplication
 import com.nemetz.ble2cloud.R
 import com.nemetz.ble2cloud.connection.CloudConnector
-import com.nemetz.ble2cloud.event.FetchCompletedEvent
-import com.nemetz.ble2cloud.ui.base.BaseFragment
 import com.nemetz.ble2cloud.ui.dialog.DeleteConfirmDialogFragment
 import com.nemetz.ble2cloud.utils.FirebaseCollections
 import kotlinx.android.synthetic.main.sensor_browser_fragment.*
-import org.greenrobot.eventbus.Subscribe
 
-class SensorBrowserFragment : BaseFragment() {
+class SensorBrowserFragment : Fragment() {
 
-    override val TAG = "SENSOR_BROWSER_FRAGMENT"
+    private val TAG = "SENSOR_BROWSER_FRAGMENT"
 
     companion object {
         fun newInstance() = SensorBrowserFragment()
@@ -112,8 +110,5 @@ class SensorBrowserFragment : BaseFragment() {
         }
     }
 
-    @Subscribe
-    fun onFetchCompletedEvent(event: FetchCompletedEvent) {
 
-    }
 }

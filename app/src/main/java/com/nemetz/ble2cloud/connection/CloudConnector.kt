@@ -80,22 +80,6 @@ class CloudConnector(val firestore: FirebaseFirestore) {
                                 .collection(FirebaseCollections.VALUES)
                                 .document(name).set(sensorValue)
                         }
-
-//                        sensor.values.forEach { sensorValue ->
-//                            sensorsReference.document(sensor.address)
-//                                .collection(FirebaseCollections.VALUES)
-//                                .document(sensorValue.format!!.name).set(
-//                                    mapOf(
-//                                        "name" to sensorValue.format!!.name,
-//                                        "unit" to sensorValue.format!!.unit,
-//                                        "uuid" to sensorValue.uuid,
-//                                        "format" to sensorValue.format!!.format,
-//                                        "offset" to sensorValue.format!!.offset,
-//                                        "substring_start" to sensorValue.format!!.substring_start,
-//                                        "substring_end" to sensorValue.format!!.substring_end
-//                                    )
-//                                )
-//                        }
                     }
                     EventBus.getDefault().post(SensorAddedEvent())
                 } else {

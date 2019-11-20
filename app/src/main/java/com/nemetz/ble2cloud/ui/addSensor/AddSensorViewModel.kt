@@ -11,7 +11,7 @@ import com.nemetz.ble2cloud.data.BLECharacteristic
 import com.nemetz.ble2cloud.data.BLEDataFormat
 import com.nemetz.ble2cloud.data.BLESensor
 import com.nemetz.ble2cloud.data.BLESensorValue
-import com.nemetz.ble2cloud.event.ServiceDiscoverEndedEvent
+import com.nemetz.ble2cloud.event.ServicesDiscoveredEvent
 import org.greenrobot.eventbus.EventBus
 import org.joda.time.DateTime
 
@@ -72,7 +72,7 @@ class AddSensorViewModel : ViewModel() {
                         )
                     )
 
-                    EventBus.getDefault().post(ServiceDiscoverEndedEvent())
+                    EventBus.getDefault().post(ServicesDiscoveredEvent())
                 }
             }
         }

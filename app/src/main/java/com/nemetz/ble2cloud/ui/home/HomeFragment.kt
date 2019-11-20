@@ -24,10 +24,6 @@ class HomeFragment : Fragment() {
     }
 
     private lateinit var viewModel: HomeViewModel
-//    private lateinit var cloudConnector: CloudConnector
-
-    var stopServiceBTN: Button? = null
-    var startServiceBTN: Button? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -79,63 +75,5 @@ class HomeFragment : Fragment() {
         }
 
         application.isServiceRunning.observe(this, serviceObserver)
-
-//        viewModel.initCharacteristics()
-
-//        cloudConnector = (context?.applicationContext as BLE2CloudApplication).cloudConnector
-
-//        startServiceButton.setOnClickListener {
-//
-////            Intent(
-////                context,
-////                DataCollectionService::class.java
-////            ).also { ContextCompat.startForegroundService(context!!, it) }
-//        }
-
-//        viewModel.characteristics = (context as MainActivity).viewModel.characteristics
-
-//        uploadButton.setOnClickListener {
-//            viewModel.characteristics.forEach {
-//                cloudConnector.saveCharacteristic(it)
-//            }
-//        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-
-        startServiceBTN = startServiceButton
-        stopServiceBTN = stopServiceButton
-
-//        startServiceButton.apply {
-//            if(isServiceRunning) {
-//                text = "Resume"
-//                setOnClickListener {
-//                    findNavController().navigate(R.id.action_global_dataCollectionFragment)
-//                }
-//            } else {
-//                text = "Start"
-//                setOnClickListener {
-//                    HomeFragmentDirections.actionActionHomeToDataCollectionOptionsFragment().also { findNavController().navigate(it) }
-//                }
-//            }
-//        }
-//
-//        if(isServiceRunning) {
-//            stopServiceButton.isEnabled = true
-//            stopServiceButton.setOnClickListener {
-//                Intent(context, DataCollectionService::class.java).apply { action = "STOP" }
-//                    .also { context!!.startService(it) }
-//                stopServiceButton.isEnabled = false
-//                stopServiceButton.setBackgroundColor(0xFFC5C5C5.toInt())
-//                startServiceButton.text = "Start"
-//                startServiceButton.setOnClickListener {
-//                    HomeFragmentDirections.actionActionHomeToDataCollectionOptionsFragment().also { findNavController().navigate(it) }
-//                }
-//            }
-//        } else {
-//            stopServiceButton.isEnabled = false
-//            stopServiceButton.setBackgroundColor(0xFFC5C5C5.toInt())
-//        }
     }
 }
