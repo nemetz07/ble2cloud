@@ -88,7 +88,7 @@ class AddSensorViewModel : ViewModel() {
                         )
                     )
 
-                    BLESensor?.values?.add(sensorValue)
+                    BLESensor?.values?.put(sensorValue.format?.name ?: "-", sensorValue)
                 }
             }
         }

@@ -7,5 +7,5 @@ import kotlinx.android.parcel.Parcelize
 data class BLESensor(
     val address: String = "",
     val name: String = "-",
-    val values: ArrayList<BLESensorValue> = arrayListOf()
+    val values: MutableMap<String, BLESensorValue> = mutableMapOf()
 ) : Parcelable

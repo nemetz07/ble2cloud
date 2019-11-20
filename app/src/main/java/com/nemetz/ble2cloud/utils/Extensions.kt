@@ -7,7 +7,6 @@ import com.google.firebase.firestore.DocumentChange
 import com.nemetz.ble2cloud.data.BLECharacteristic
 import com.nemetz.ble2cloud.data.BLEDataFormat
 import com.nemetz.ble2cloud.data.BLESensor
-import java.util.*
 
 fun SparseArray<ByteArray>.asFirestoreData(): MutableMap<String, List<Int>> {
     val mutableMap = mutableMapOf<String, List<Int>>()
@@ -49,13 +48,13 @@ fun List<ParcelUuid>.asFirestoreData(): List<String> {
     return arrayList
 }
 
-fun DocumentChange.getMySensor(): BLESensor {
-    val mySensor = this.document.toObject(BLESensor::class.java)
+fun DocumentChange.getBLESensor(): BLESensor {
+    val sensor = this.document.toObject(BLESensor::class.java)
 
-    return mySensor
+    return sensor
 }
 
-fun DocumentChange.getMyCharacteristic(): BLECharacteristic? {
+fun DocumentChange.getBLECharactersitic(): BLECharacteristic? {
     var values: Any? = this.document.get("values") ?: return null
     values = values as Map<String, Map<String, String?>>
 
@@ -74,12 +73,12 @@ fun DocumentChange.getMyCharacteristic(): BLECharacteristic? {
         )
     }
 
-    val myCharacteristic = BLECharacteristic(
+    val characterstic = BLECharacteristic(
         uuid = this.document.get("uuid") as String,
         data = data
     )
 
-    return myCharacteristic
+    return characterstic
 }
 
 fun DocumentChange.getPath(): String {

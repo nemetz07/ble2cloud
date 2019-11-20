@@ -49,6 +49,7 @@ class MainActivity : AppCompatActivity(), EventListener<QuerySnapshot> {
 
     lateinit var viewModel: SharedViewModel
     private var mCharacteristicRegistration: ListenerRegistration? = null
+    private var mSensorRegistration: ListenerRegistration? = null
 
     /* Lifecycle START */
 
@@ -108,9 +109,8 @@ class MainActivity : AppCompatActivity(), EventListener<QuerySnapshot> {
 
     override fun onStart() {
         super.onStart()
-        mCharacteristicRegistration =
-            FirebaseFirestore.getInstance().collection(FirebaseCollections.CHARACTERISTICS)
-                .addSnapshotListener(this)
+        mCharacteristicRegistration = FirebaseFirestore.getInstance().collection(FirebaseCollections.CHARACTERISTICS).addSnapshotListener(this)
+        mSensorRegistration = FirebaseFirestore.getInstance().collection(FirebaseCollections.SENSORS).addSnapshotListener(this)
 
         if (PermissionManager.checkLocationPermission(this))
             EventBus.getDefault().post(LocationPermissionAvailableEvent())
@@ -127,6 +127,7 @@ class MainActivity : AppCompatActivity(), EventListener<QuerySnapshot> {
     override fun onDestroy() {
 
         mCharacteristicRegistration?.remove()
+        mSensorRegistration?.remove()
 
         EventBus.getDefault().unregister(this)
         super.onDestroy()
@@ -206,6 +207,22 @@ class MainActivity : AppCompatActivity(), EventListener<QuerySnapshot> {
                         DocumentChange.Type.REMOVED -> {
                             viewModel.removeCharacteristic(change)
                             Log.w(TAG, "CHARACTERISTIC removed")
+                        }
+                    }
+                }
+                FirebaseCollections.SENSORS -> {
+                    when (change.type) {
+                        DocumentChange.Type.ADDED -> {
+                            viewModel.addSensor(change)
+                            Log.w(TAG, "SENSOR added")
+                        }
+                        DocumentChange.Type.MODIFIED -> {
+                            viewModel.modifySensor(change)
+                            Log.w(TAG, "SENSOR modified")
+                        }
+                        DocumentChange.Type.REMOVED -> {
+                            viewModel.removeSensor(change)
+                            Log.w(TAG, "SENSOR removed")
                         }
                     }
                 }

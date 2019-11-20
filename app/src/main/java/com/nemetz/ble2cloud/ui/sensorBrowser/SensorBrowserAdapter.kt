@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.firestore.*
 import com.nemetz.ble2cloud.R
 import com.nemetz.ble2cloud.data.BLESensor
-import com.nemetz.ble2cloud.utils.getMySensor
+import com.nemetz.ble2cloud.utils.getBLESensor
 
 class SensorBrowserAdapter() :
     RecyclerView.Adapter<SensorBrowserAdapter.ViewHolder>(), EventListener<QuerySnapshot> {
@@ -44,7 +44,7 @@ class SensorBrowserAdapter() :
     }
 
     private fun addSensor(change: DocumentChange) {
-        change.getMySensor().let {
+        change.getBLESensor().let {
             cellSensors.add(change.newIndex, it)
         }
 
@@ -54,11 +54,11 @@ class SensorBrowserAdapter() :
     fun modifySensor(change: DocumentChange) {
         if (change.oldIndex == change.newIndex) {
             // Item changed but remained in same position
-            cellSensors[change.oldIndex] = change.getMySensor().let { it }
+            cellSensors[change.oldIndex] = change.getBLESensor().let { it }
         } else {
             // Item changed and changed position
             cellSensors.removeAt(change.oldIndex)
-            change.getMySensor().let { cellSensors.add(change.newIndex, it) }
+            change.getBLESensor().let { cellSensors.add(change.newIndex, it) }
             notifyItemMoved(change.oldIndex, change.newIndex)
         }
     }

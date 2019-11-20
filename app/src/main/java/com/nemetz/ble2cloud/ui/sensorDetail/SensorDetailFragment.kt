@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.github.mikephil.charting.utils.Utils
 import com.google.android.gms.maps.MapView
 import com.google.firebase.firestore.FirebaseFirestore
 import com.nemetz.ble2cloud.R
@@ -79,6 +80,8 @@ class SensorDetailFragment : BaseFragment() {
     }
 
     private fun init() {
+        Utils.init(context)
+
         viewModel.sensor = args.sensor
 
         viewAdapter = ChartDataAdapter(context!!, viewModel.chartItems)

@@ -5,5 +5,6 @@
     <color name="colorAccent">#EF5350</color>
     <color name="colorButtonSuccess">#5E9E5F</color>
     <color name="dataCellLocal">#DCEDC8</color>
-    <color name="dataCellOnline">#E9E9E9</color>
+    <color name="dataCellRemote">#E9E9E9</color>
+    <color name="dataCellAlert">#E57373</color>
 </resources>

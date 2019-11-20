@@ -71,7 +71,7 @@
         android:id="@+id/sensorDetailMapOverlayTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="No location dataBLE"
+        android:text="No location data"
         android:textColor="#CBFFFFFF"
         android:textSize="30sp"
         app:layout_constraintBottom_toBottomOf="@+id/sensorDetailMapView"

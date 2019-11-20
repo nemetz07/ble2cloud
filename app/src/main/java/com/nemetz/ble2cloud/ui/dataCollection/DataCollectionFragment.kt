@@ -13,6 +13,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import com.nemetz.ble2cloud.BLE2CloudApplication
+import com.nemetz.ble2cloud.MainActivity
 import com.nemetz.ble2cloud.R
 import com.nemetz.ble2cloud.event.DataCollectionAddedEvent
 import com.nemetz.ble2cloud.service.DataCollectionService
@@ -44,7 +45,7 @@ class DataCollectionFragment : BaseFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProviders.of(this).get(DataCollectionViewModel::class.java)
-        viewAdapter = DataCollectionAdapter(viewModel.cellData)
+        viewAdapter = DataCollectionAdapter(viewModel.cellData, (context as MainActivity).viewModel.sensors)
         viewManager = LinearLayoutManager(context)
 
         dataCollectionRecyclerView.apply {

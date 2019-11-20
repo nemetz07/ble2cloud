@@ -18,6 +18,7 @@ class LineChartItem(
     private var referenceTimestamp: Long,
     var chartName: String,
     private val onRangeButtonClickListener: View.OnClickListener,
+    private val onEditButtonClickListener: View.OnClickListener,
     private val unit: String
 ) : ChartItem(cd) {
 
@@ -43,6 +44,7 @@ class LineChartItem(
             holder.chart = (convertView as View).findViewById(R.id.chart)
             holder.chartNameTV = convertView.findViewById(R.id.chartNameTV)
             holder.chartSetRangeButton = convertView.findViewById(R.id.chartSetRangeButton)
+            holder.chartEditButton = convertView.findViewById(R.id.chartEditButton)
             convertView.tag = holder
         } else {
             holder = convertView.tag as ViewHolder
@@ -88,7 +90,8 @@ class LineChartItem(
         // holder.chart.invalidate();
         holder.chart!!.animateX(2000)
 
-        holder.chartSetRangeButton?.setOnClickListener(onRangeButtonClickListener)
+        holder.chartSetRangeButton?.setOnClickListener (onRangeButtonClickListener)
+        holder.chartEditButton?.setOnClickListener (onEditButtonClickListener)
 
         return convertView
     }
@@ -97,5 +100,6 @@ class LineChartItem(
         internal var chart: LineChart? = null
         internal var chartNameTV: TextView? = null
         internal var chartSetRangeButton: Button? = null
+        internal var chartEditButton: Button? = null
     }
 }

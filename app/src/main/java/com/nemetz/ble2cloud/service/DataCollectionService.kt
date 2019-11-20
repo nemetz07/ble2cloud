@@ -26,7 +26,7 @@ import com.nemetz.ble2cloud.data.BLESensor
 import com.nemetz.ble2cloud.data.BLESensorData
 import com.nemetz.ble2cloud.ui.home.DESCRIPTOR_CONFIG
 import com.nemetz.ble2cloud.utils.FirebaseCollections
-import com.nemetz.ble2cloud.utils.getMySensor
+import com.nemetz.ble2cloud.utils.getBLESensor
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -106,7 +106,7 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
 
                     gatt.services.forEach { service ->
                         service.characteristics.forEach { characteristic ->
-                            if (sensor.BLESensor.values.any { it.uuid == characteristic.uuid.toString() }) {
+                            if (sensor.BLESensor.values.any { it.value.uuid == characteristic.uuid.toString() }) {
                                 characteristic.descriptors.forEach { descriptor ->
                                     if (descriptor.uuid == DESCRIPTOR_CONFIG) {
                                         gatt.readDescriptor(descriptor)
@@ -143,7 +143,7 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if ((ACTION_STOP_SERVICE == intent?.action) or ((applicationContext as BLE2CloudApplication).isServiceRunning.value ?: false)) {
+        if ((ACTION_STOP_SERVICE == intent?.action) or ((applicationContext as BLE2CloudApplication).isServiceRunning.value == true)) {
             Log.d(TAG, "called to cancel service")
 
             BLEScanner.stopScan(scanCallback)
@@ -231,8 +231,8 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
             return
         }
 
-        sensor.BLESensor.values.forEach { sensorValue ->
-            val dataBLE: BLESensorData = when (sensorValue.format?.format) {
+        sensor.BLESensor.values.forEach { (_, sensorValue) ->
+            val sensorData: BLESensorData = when (sensorValue.format?.format) {
                 "STRING" -> {
                     processStringData(sensorValue.format!!, characteristic)
                 }
@@ -250,26 +250,26 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
 
             if (locationRecord) {
                 fusedLocationClient?.lastLocation?.addOnSuccessListener {
-                    dataBLE.latitude = it.latitude
-                    dataBLE.longitude = it.longitude
-                    dataBLE.sensorName = sensor.BLESensor.name
-                    dataBLE.address = sensor.BLESensor.address
+                    sensorData.latitude = it.latitude
+                    sensorData.longitude = it.longitude
+                    sensorData.sensorName = sensor.BLESensor.name
+                    sensorData.address = sensor.BLESensor.address
                     if (sensorValue.format != null) {
-                        dataBLE.name = sensorValue.format!!.name
-                        dataBLE.unit = sensorValue.format!!.unit
+                        sensorData.name = sensorValue.format!!.name
+                        sensorData.unit = sensorValue.format!!.unit
                     }
 
-                    saveData(sensor.BLESensor.address, sensorValue.format!!, dataBLE)
+                    saveData(sensor.BLESensor.address, sensorValue.format!!, sensorData)
                 }
             } else {
-                dataBLE.sensorName = sensor.BLESensor.name
-                dataBLE.address = sensor.BLESensor.address
+                sensorData.sensorName = sensor.BLESensor.name
+                sensorData.address = sensor.BLESensor.address
                 if (sensorValue.format != null) {
-                    dataBLE.name = sensorValue.format!!.name
-                    dataBLE.unit = sensorValue.format!!.unit
+                    sensorData.name = sensorValue.format!!.name
+                    sensorData.unit = sensorValue.format!!.unit
                 }
 
-                saveData(sensor.BLESensor.address, sensorValue.format!!, dataBLE)
+                saveData(sensor.BLESensor.address, sensorValue.format!!, sensorData)
             }
 
         }
@@ -310,8 +310,8 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
         return BLESensorData(value = data)
     }
 
-    private fun saveData(address: String, BLEDataFormat: BLEDataFormat, dataBLE: BLESensorData) {
-        cloudConnector?.saveData(address, BLEDataFormat, dataBLE)
+    private fun saveData(address: String, dataFormat: BLEDataFormat, sensorData: BLESensorData) {
+        cloudConnector?.saveData(address, dataFormat, sensorData)
     }
 
     private suspend fun scannerTask(): Boolean {
@@ -383,16 +383,16 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
 
         if (change.oldIndex == change.newIndex) {
             // Item changed but remained in same position
-            sensors[change.oldIndex] = change.getMySensor()
+            sensors[change.oldIndex] = change.getBLESensor()
         } else {
             // Item changed and changed position
             sensors.removeAt(change.oldIndex)
-            change.getMySensor().let { sensors.add(change.newIndex, it) }
+            change.getBLESensor().let { sensors.add(change.newIndex, it) }
         }
     }
 
     private fun addSensor(change: DocumentChange?) {
-        change?.getMySensor()?.let { sensors.add(change.newIndex, it) }
+        change?.getBLESensor()?.let { sensors.add(change.newIndex, it) }
     }
 
     private fun createNotification(): Notification {

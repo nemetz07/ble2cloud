@@ -100,7 +100,7 @@ class ScannerViewModel : ViewModel() {
 //
 //                            for (service in gatt.services) {
 //                                Log.d(TAG, "SERVICE: ${service.uuid}")
-//                                for (characteristic in service.BLECharacteristics) {
+//                                for (characteristic in service.characteristics) {
 //                                    Log.d(TAG, "    -> CHARACTERISTIC: (${characteristic.uuid})")
 //                                    for (descriptor in characteristic.descriptors) {
 //                                        Log.d(TAG, "        -> DESCRIPTOR: ${descriptor.uuid}")

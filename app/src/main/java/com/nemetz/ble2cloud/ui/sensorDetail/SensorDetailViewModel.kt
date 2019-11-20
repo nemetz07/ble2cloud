@@ -2,8 +2,10 @@ package com.nemetz.ble2cloud.ui.sensorDetail
 
 import android.content.DialogInterface
 import android.graphics.Color
+import android.os.Build
 import android.util.Log
 import android.view.View
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModel
 import com.github.mikephil.charting.data.Entry
@@ -24,6 +26,7 @@ import com.nemetz.ble2cloud.data.BLESensor
 import com.nemetz.ble2cloud.data.BLESensorValue
 import com.nemetz.ble2cloud.event.ChartAddedEvent
 import com.nemetz.ble2cloud.event.SensorDetailMapUpdatedEvent
+import com.nemetz.ble2cloud.ui.dialog.EditSensorDialogFragment
 import com.nemetz.ble2cloud.ui.dialog.RangeDialogFragment
 import com.nemetz.ble2cloud.ui.sensorDetail.chart.LineChartItem
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog
@@ -35,7 +38,6 @@ import java.util.*
 
 
 class SensorDetailViewModel : ViewModel() {
-
     private var TAG = "SENSOR_DETAIL_VIEWMODEL"
 
     var sensor: BLESensor? = null
@@ -55,16 +57,33 @@ class SensorDetailViewModel : ViewModel() {
         latLngBoundsBuilder = LatLngBounds.Builder()
     }
 
+    private fun getEditClickListener(
+        fragmentManager: FragmentManager,
+        sensorValue: BLESensorValue
+    ): View.OnClickListener {
+
+        return View.OnClickListener {
+            Log.d("EDIT", "onClick")
+
+            val transaction = fragmentManager.beginTransaction()
+            transaction.apply {
+                add(EditSensorDialogFragment(sensor!!.address, sensorValue), "EditSensorDialog")
+                commitAllowingStateLoss()
+            }
+        }
+
+    }
+
     private fun getRangeClickListener(
         fragmentManager: FragmentManager,
         BLESensorValue: BLESensorValue
     ): View.OnClickListener {
         return View.OnClickListener {
-            RangeDialogFragment(DialogInterface.OnClickListener { dialog: DialogInterface, which: Int ->
+            RangeDialogFragment(DialogInterface.OnClickListener { _: DialogInterface, which: Int ->
                 when (which) {
                     0 -> {
                         updateChart(
-                            BLESensorValue = BLESensorValue,
+                            sensorValue = BLESensorValue,
                             startTimestamp = Timestamp(DateTime.now().minusHours(1).toDate()),
                             endTimestamp = Timestamp(DateTime.now().toDate()),
                             fragmentManager = fragmentManager
@@ -72,7 +91,7 @@ class SensorDetailViewModel : ViewModel() {
                     }
                     1 -> {
                         updateChart(
-                            BLESensorValue = BLESensorValue,
+                            sensorValue = BLESensorValue,
                             startTimestamp = Timestamp(DateTime.now().minusHours(3).toDate()),
                             endTimestamp = Timestamp(DateTime.now().toDate()),
                             fragmentManager = fragmentManager
@@ -80,7 +99,7 @@ class SensorDetailViewModel : ViewModel() {
                     }
                     2 -> {
                         updateChart(
-                            BLESensorValue = BLESensorValue,
+                            sensorValue = BLESensorValue,
                             startTimestamp = Timestamp(DateTime.now().minusDays(1).toDate()),
                             endTimestamp = Timestamp(DateTime.now().toDate()),
                             fragmentManager = fragmentManager
@@ -102,7 +121,7 @@ class SensorDetailViewModel : ViewModel() {
                                 endDateTime.addHours(745)
 
                                 updateChart(
-                                    BLESensorValue = BLESensorValue,
+                                    sensorValue = BLESensorValue,
                                     startTimestamp = Timestamp(startDateTime.toDate()),
                                     endTimestamp = Timestamp(endDateTime.toDate()),
                                     fragmentManager = fragmentManager
@@ -186,15 +205,16 @@ class SensorDetailViewModel : ViewModel() {
     fun fetchCharts(
         fragmentManager: FragmentManager
     ) {
-        sensor!!.values.forEach { sensorValue ->
+        sensor!!.values.forEach { (name, sensorValue) ->
             cloudConnector.getData(
                 address = sensor!!.address,
-                name = sensorValue.format!!.name
+                name = name
             ).addOnCompleteListener { querySnapshot ->
                 initChart(
                     querySnapshot,
                     sensorValue,
-                    getRangeClickListener(fragmentManager, sensorValue)
+                    getRangeClickListener(fragmentManager, sensorValue),
+                    getEditClickListener(fragmentManager, sensorValue)
                 )
                 updateMap()
             }
@@ -203,17 +223,17 @@ class SensorDetailViewModel : ViewModel() {
     }
 
     private fun updateChart(
-        BLESensorValue: BLESensorValue,
+        sensorValue: BLESensorValue,
         startTimestamp: Timestamp,
         endTimestamp: Timestamp,
         fragmentManager: FragmentManager
     ) {
         val position =
-            chartItems.indexOf(chartItems.find { it.chartName == BLESensorValue.format?.name })
+            chartItems.indexOf(chartItems.find { it.chartName == sensorValue.format?.name })
 
         cloudConnector.getDataBetween(
             address = sensor!!.address,
-            name = BLESensorValue.format!!.name,
+            name = sensorValue.format!!.name,
             startTimestamp = startTimestamp,
             endTimestamp = endTimestamp,
             limit = 100
@@ -221,8 +241,9 @@ class SensorDetailViewModel : ViewModel() {
             chartItems.removeAt(position)
             initChart(
                 querySnapshot,
-                BLESensorValue,
-                getRangeClickListener(fragmentManager, BLESensorValue),
+                sensorValue,
+                getRangeClickListener(fragmentManager, sensorValue),
+                getEditClickListener(fragmentManager, sensorValue),
                 position
             )
             updateMap()
@@ -233,6 +254,7 @@ class SensorDetailViewModel : ViewModel() {
         querySnapshot: Task<QuerySnapshot>,
         BLESensorValue: BLESensorValue,
         onRangeButtonClickListener: View.OnClickListener,
+        onEditButtonClickListener: View.OnClickListener,
         position: Int? = null
     ) {
         val entries = arrayListOf<Entry>()
@@ -279,6 +301,7 @@ class SensorDetailViewModel : ViewModel() {
                     referenceTime ?: 0,
                     BLESensorValue.format!!.name,
                     onRangeButtonClickListener,
+                    onEditButtonClickListener,
                     BLESensorValue.format!!.unit
                 )
             )
@@ -290,6 +313,7 @@ class SensorDetailViewModel : ViewModel() {
                     referenceTime ?: 0,
                     BLESensorValue.format!!.name,
                     onRangeButtonClickListener,
+                    onEditButtonClickListener,
                     BLESensorValue.format!!.unit
                 )
             )

@@ -54,7 +54,7 @@ class AddSensorFragment : BaseFragment() {
     }
 
     private fun init() {
-        viewModel.BLECharacteristics = (context as MainActivity).viewModel.BLECharacteristics
+        viewModel.BLECharacteristics = (context as MainActivity).viewModel.characteristics
 
         viewManager = LinearLayoutManager(context)
         viewAdapter = CharacteristicsAdapter(viewModel.characteristics)

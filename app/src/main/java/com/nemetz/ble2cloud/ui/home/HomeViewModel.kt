@@ -13,11 +13,11 @@ val DESCRIPTOR_CONFIG = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
 class HomeViewModel : ViewModel() {
     private val TAG = "HOME_VIEWMODEL"
 
-//    var BLECharacteristics: ArrayList<BLECharacteristic> = arrayListOf()
+//    var characteristics: ArrayList<BLECharacteristic> = arrayListOf()
 
 //    fun initCharacteristics() {
 //
-//        BLECharacteristics.add(
+//        characteristics.add(
 //            BLECharacteristic(
 //                uuid = "00002a37-0000-1000-8000-00805f9b34fb",
 //                data = arrayListOf(
@@ -31,7 +31,7 @@ class HomeViewModel : ViewModel() {
 //            )
 //        )
 //
-//        BLECharacteristics.add(
+//        characteristics.add(
 //            BLECharacteristic(
 //                uuid = "226caa55-6476-4566-7562-66734470666d",
 //                data = arrayListOf(
