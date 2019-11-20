@@ -54,7 +54,7 @@ class SensorBrowserAdapter :
         notifyItemInserted(change.newIndex)
     }
 
-    fun modifySensor(change: DocumentChange) {
+    private fun modifySensor(change: DocumentChange) {
         if (change.oldIndex == change.newIndex) {
             // Item changed but remained in same position
             cellSensors[change.oldIndex] = change.getBLESensor().let { it }
@@ -78,8 +78,8 @@ class SensorBrowserAdapter :
     }
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
-        var sensorNameTV = view.findViewById<TextView>(R.id.sensorBrowserNameTV)
-        var sensorAddressTv = view.findViewById<TextView>(R.id.sensorBrowserAddressTV)
+        var sensorNameTV: TextView? = view.findViewById(R.id.sensorBrowserNameTV)
+        var sensorAddressTv: TextView? = view.findViewById(R.id.sensorBrowserAddressTV)
 
         init {
             view.setOnClickListener(this)
@@ -100,10 +100,10 @@ class SensorBrowserAdapter :
     override fun getItemCount() = cellSensors.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-//        val sensorBrowserCell: BLESensor? = mSnapshots[position].toObject(BLESensor::class.java)
+//        val sensorBrowserCell: sensor? = mSnapshots[position].toObject(sensor::class.java)
         val mySensor = cellSensors[position]
-        holder.sensorNameTV.text = mySensor.name
-        holder.sensorAddressTv.text = mySensor.address
+        holder.sensorNameTV?.text = mySensor.name
+        holder.sensorAddressTv?.text = mySensor.address
     }
 
 

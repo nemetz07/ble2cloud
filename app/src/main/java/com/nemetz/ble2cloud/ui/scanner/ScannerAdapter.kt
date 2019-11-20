@@ -9,7 +9,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.nemetz.ble2cloud.R
 
-class ScannerAdapter(val cellSensors: ArrayList<ScannerCell>) :
+class ScannerAdapter(private val cellSensors: ArrayList<ScannerCell>) :
     RecyclerView.Adapter<ScannerAdapter.ScannerViewHolder>() {
 
     private lateinit var context: Context

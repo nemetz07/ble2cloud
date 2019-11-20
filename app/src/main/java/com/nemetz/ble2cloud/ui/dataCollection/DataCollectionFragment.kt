@@ -33,8 +33,6 @@ class DataCollectionFragment : BaseFragment() {
     private lateinit var viewAdapter: DataCollectionAdapter
     private lateinit var viewManager: LinearLayoutManager
 
-    private var mRegistration: ListenerRegistration? = null
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?

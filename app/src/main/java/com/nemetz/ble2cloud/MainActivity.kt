@@ -134,7 +134,7 @@ class MainActivity : AppCompatActivity(), EventListener<QuerySnapshot> {
         super.onDestroy()
     }
 
-    fun hideNavigationBar() {
+    private fun hideNavigationBar() {
         with(bottomNavbar) {
             if (visibility == View.VISIBLE && alpha == 1f) {
                 animate()
@@ -145,7 +145,7 @@ class MainActivity : AppCompatActivity(), EventListener<QuerySnapshot> {
         }
     }
 
-    fun showNavigationBar() {
+    private fun showNavigationBar() {
         with(bottomNavbar) {
             visibility = View.VISIBLE
             animate()

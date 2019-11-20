@@ -18,10 +18,10 @@ class CharacteristicsAdapter(val cellCharacteristics: ArrayList<CharacteristicCe
     lateinit var mClickListener: ItemClickListener
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
-        var nameTextView = view.findViewById<TextView>(R.id.characteristicCellNameTV)
-        var uuidTextView = view.findViewById<TextView>(R.id.characteristicCellUUIDTV)
-        var unitTextView = view.findViewById<TextView>(R.id.characteristicCellUnitTV)
-        var enableSwitch = view.findViewById<Switch>(R.id.characteristicCellEnableSwitch)
+        var nameTextView: TextView = view.findViewById<TextView>(R.id.characteristicCellNameTV)
+        var uuidTextView: TextView = view.findViewById<TextView>(R.id.characteristicCellUUIDTV)
+        var unitTextView: TextView = view.findViewById<TextView>(R.id.characteristicCellUnitTV)
+        var enableSwitch: Switch = view.findViewById<Switch>(R.id.characteristicCellEnableSwitch)
 
         init {
             view.setOnClickListener(this)

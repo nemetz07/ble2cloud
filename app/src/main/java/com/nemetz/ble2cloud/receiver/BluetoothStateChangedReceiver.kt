@@ -15,8 +15,7 @@ class BluetoothStateChangedReceiver : BroadcastReceiver() {
         val action = brIntent?.action
 
         if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
-            val state = brIntent?.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)
-            when (state) {
+            when (brIntent?.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)) {
                 BluetoothAdapter.STATE_OFF -> {
                     Log.d(TAG, "Bluetooth turned off!")
                     EventBus.getDefault().post(CloseAppEvent())

@@ -29,7 +29,7 @@ class SensorDetailFragment : BaseFragment() {
         fun newInstance() = SensorDetailFragment()
     }
 
-    val args: SensorDetailFragmentArgs by navArgs()
+    private val args: SensorDetailFragmentArgs by navArgs()
 
     private lateinit var viewModel: SensorDetailViewModel
     private lateinit var viewAdapter: ChartDataAdapter

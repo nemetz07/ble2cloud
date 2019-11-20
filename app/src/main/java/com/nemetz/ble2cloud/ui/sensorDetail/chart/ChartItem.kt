@@ -18,8 +18,8 @@ abstract class ChartItem internal constructor(internal var mChartData: ChartData
 
     companion object {
 
-        internal val TYPE_BARCHART = 0
-        internal val TYPE_LINECHART = 1
-        internal val TYPE_PIECHART = 2
+        internal const val TYPE_BARCHART = 0
+        internal const val TYPE_LINECHART = 1
+        internal const val TYPE_PIECHART = 2
     }
 }

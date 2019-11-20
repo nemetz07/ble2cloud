@@ -21,10 +21,10 @@ class AddSensorViewModel : ViewModel() {
     var bluetoothDevice: BluetoothDevice? = null
     var bluetoothGatt: BluetoothGatt? = null
     var services: MutableList<BluetoothGattService>? = null
-    var BLESensor: BLESensor? = null
-    val characteristics: ArrayList<CharacteristicCell> = arrayListOf()
+    var sensor: BLESensor? = null
+    val cellCharactersitics: ArrayList<CharacteristicCell> = arrayListOf()
 
-    lateinit var BLECharacteristics: ArrayList<BLECharacteristic>
+    lateinit var charactersitics: ArrayList<BLECharacteristic>
 
     private val gattCallback = object : BluetoothGattCallback() {
         override fun onConnectionStateChange(gatt: BluetoothGatt?, status: Int, newState: Int) {
@@ -54,20 +54,20 @@ class AddSensorViewModel : ViewModel() {
     }
 
     fun onServicesDiscovered() {
-        BLESensor = BLESensor(
+        sensor = BLESensor(
             name = bluetoothDevice?.name ?: "-",
             address = bluetoothDevice?.address ?: "00:00:00:00:00:00"
         )
 
         services?.forEach { service ->
             service.characteristics.forEach { characteristic ->
-                val myCharacteristic =
-                    BLECharacteristics.find { it.uuid == characteristic.uuid.toString() }
-                myCharacteristic?.data?.forEach { dataFormat ->
-                    characteristics.add(
+                val bleCharacteristic =
+                    charactersitics.find { it.uuid == characteristic.uuid.toString() }
+                bleCharacteristic?.data?.forEach { dataFormat ->
+                    cellCharactersitics.add(
                         CharacteristicCell(
                             name = dataFormat.name,
-                            uuid = myCharacteristic.uuid ?: "-",
+                            uuid = bleCharacteristic.uuid ?: "-",
                             unit = dataFormat.unit
                         )
                     )
@@ -87,9 +87,9 @@ class AddSensorViewModel : ViewModel() {
     }
 
     fun saveSensor(cloudConnector: CloudConnector) {
-        characteristics.forEach { characteristic ->
+        cellCharactersitics.forEach { characteristic ->
             if (characteristic.enabled) {
-                val myCharacteristic = BLECharacteristics.find { it.uuid == characteristic.uuid }
+                val myCharacteristic = charactersitics.find { it.uuid == characteristic.uuid }
                 val dataFormat = myCharacteristic?.data?.find { it.name == characteristic.name }
                 if (dataFormat != null) {
                     val sensorValue = BLESensorValue(
@@ -104,7 +104,7 @@ class AddSensorViewModel : ViewModel() {
                         )
                     )
 
-                    BLESensor?.apply {
+                    sensor?.apply {
                         values[sensorValue.format?.name ?: "-"] = sensorValue
                         createdAt = Timestamp(DateTime.now().toDate())
                         createdBy = FirebaseAuth.getInstance().uid ?: "-"
@@ -113,6 +113,6 @@ class AddSensorViewModel : ViewModel() {
             }
         }
 
-        cloudConnector.saveSensor(BLESensor!!)
+        cloudConnector.saveSensor(sensor!!)
     }
 }

@@ -37,7 +37,7 @@ class ScannerFragment : BaseFragment() {
 
     private val mClickListener = object : ScannerAdapter.ItemClickListener {
         override fun onItemClick(view: View, position: Int) {
-//            cloudConnector.saveSensor(viewModel.complexSensors[position].BLESensor)
+//            cloudConnector.saveSensor(viewModel.complexSensors[position].sensor)
             val device = viewModel.complexSensors[position].bluetoothDevice
             val action = ScannerFragmentDirections.actionActionScanToAddSensorFragment(device)
             findNavController().navigate(action)
@@ -85,7 +85,7 @@ class ScannerFragment : BaseFragment() {
         }
     }
 
-    fun refresh() {
+    private fun refresh() {
         val bleScanner = (context!!.applicationContext as BLE2CloudApplication).bleScanner
         if (!bleScanner.isReady) {
             Log.d("SCANNER", "Can't refresh because scanner is not initialized!")

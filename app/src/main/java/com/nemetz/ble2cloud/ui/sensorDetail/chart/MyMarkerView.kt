@@ -18,9 +18,9 @@ class MyMarkerView(
 ) :
     MarkerView(context, layoutResource) {
 
-    var dateTV: TextView = findViewById(R.id.customChartMarkerDateTV)
-    var timeTV: TextView = findViewById(R.id.customChartMarkerTimeTV)
-    var valueTV: TextView = findViewById(R.id.customChartMarkerValueTV)
+    private var dateTV: TextView = findViewById(R.id.customChartMarkerDateTV)
+    private var timeTV: TextView = findViewById(R.id.customChartMarkerTimeTV)
+    private var valueTV: TextView = findViewById(R.id.customChartMarkerValueTV)
     private val mDate: Date = Date()
 
     override fun refreshContent(e: Entry?, highlight: Highlight?) {

@@ -12,7 +12,7 @@ import com.nemetz.ble2cloud.BLE2CloudApplication
 import com.nemetz.ble2cloud.R
 import com.nemetz.ble2cloud.data.BLESensorValue
 
-class EditSensorDialogFragment(val address: String, val sensorValue: BLESensorValue) :
+class EditSensorDialogFragment(val address: String, private val sensorValue: BLESensorValue) :
     DialogFragment() {
 
     private val min = -100

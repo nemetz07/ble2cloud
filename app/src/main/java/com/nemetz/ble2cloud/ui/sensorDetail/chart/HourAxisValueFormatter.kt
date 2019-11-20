@@ -32,11 +32,11 @@ class HourAxisValueFormatter(
     }
 
     private fun getHour(timestamp: Long): String {
-        try {
+        return try {
             mDate.time = timestamp * 1000
-            return mDataFormat.format(mDate)
+            mDataFormat.format(mDate)
         } catch (ex: Exception) {
-            return "xx"
+            "xx"
         }
     }
 }

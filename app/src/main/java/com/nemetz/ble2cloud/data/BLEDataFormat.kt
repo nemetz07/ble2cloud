@@ -14,16 +14,16 @@ data class BLEDataFormat(
     var substring_end: Int? = null
 ) : Parcelable {
     fun dataFormat(): Int {
-        when (format) {
-            "UINT8" -> return BluetoothGattCharacteristic.FORMAT_UINT8
-            "UINT16" -> return BluetoothGattCharacteristic.FORMAT_UINT16
-            "UINT32" -> return BluetoothGattCharacteristic.FORMAT_UINT32
-            "SINT8" -> return BluetoothGattCharacteristic.FORMAT_SINT8
-            "SINT16" -> return BluetoothGattCharacteristic.FORMAT_SINT16
-            "SINT32" -> return BluetoothGattCharacteristic.FORMAT_SINT32
-            "FLOAT" -> return BluetoothGattCharacteristic.FORMAT_FLOAT
-            "SFLOAT" -> return BluetoothGattCharacteristic.FORMAT_SFLOAT
-            else -> return 0
+        return when (format) {
+            "UINT8" -> BluetoothGattCharacteristic.FORMAT_UINT8
+            "UINT16" -> BluetoothGattCharacteristic.FORMAT_UINT16
+            "UINT32" -> BluetoothGattCharacteristic.FORMAT_UINT32
+            "SINT8" -> BluetoothGattCharacteristic.FORMAT_SINT8
+            "SINT16" -> BluetoothGattCharacteristic.FORMAT_SINT16
+            "SINT32" -> BluetoothGattCharacteristic.FORMAT_SINT32
+            "FLOAT" -> BluetoothGattCharacteristic.FORMAT_FLOAT
+            "SFLOAT" -> BluetoothGattCharacteristic.FORMAT_SFLOAT
+            else -> 0
         }
     }
 }

@@ -22,7 +22,7 @@ import org.greenrobot.eventbus.EventBus
 import java.util.*
 
 class DataCollectionAdapter(
-    val cellData: ArrayList<DataCollectionCell>,
+    private val cellData: ArrayList<DataCollectionCell>,
     val sensors: ArrayList<BLESensor>
 ) :
     RecyclerView.Adapter<DataCollectionAdapter.ViewHolder>(), EventListener<QuerySnapshot> {
@@ -185,12 +185,12 @@ class DataCollectionAdapter(
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var createdAtTV = itemView.findViewById<TextView>(R.id.dataCollectionCellCreatedAtTV)
-        var valueTV = itemView.findViewById<TextView>(R.id.dataCollectionCellValueTV)
-        var nameTV = itemView.findViewById<TextView>(R.id.dataCollectionCellNameTV)
-        var sensorNameTV = itemView.findViewById<TextView>(R.id.dataCollectionCellSensorNameTV)
-        var addressTV = itemView.findViewById<TextView>(R.id.dataCollectionCellAddressTV)
-        var icon = itemView.findViewById<ImageView>(R.id.dataCollectionCellIcon)
+        var createdAtTV: TextView = itemView.findViewById<TextView>(R.id.dataCollectionCellCreatedAtTV)
+        var valueTV: TextView = itemView.findViewById<TextView>(R.id.dataCollectionCellValueTV)
+        var nameTV: TextView = itemView.findViewById<TextView>(R.id.dataCollectionCellNameTV)
+        var sensorNameTV: TextView = itemView.findViewById<TextView>(R.id.dataCollectionCellSensorNameTV)
+        var addressTV: TextView = itemView.findViewById<TextView>(R.id.dataCollectionCellAddressTV)
+        var icon: ImageView = itemView.findViewById<ImageView>(R.id.dataCollectionCellIcon)
     }
 
 }

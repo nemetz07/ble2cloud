@@ -18,8 +18,6 @@ val uiScope = CoroutineScope(Dispatchers.Main)
 val ioScope = CoroutineScope(Dispatchers.IO)
 
 
-var OPEN_SERVICE = "OPEN_SERVICE"
-
 @SuppressLint("ConstantLocale")
 val SDF_FULL: SimpleDateFormat = SimpleDateFormat("yyyy.MM.dd HH:mm:ss", Locale.getDefault())
 @SuppressLint("ConstantLocale")

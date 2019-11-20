@@ -21,12 +21,8 @@ import com.nemetz.ble2cloud.R
 import com.nemetz.ble2cloud.connection.BLEScanSettings
 import com.nemetz.ble2cloud.connection.BLEScanner
 import com.nemetz.ble2cloud.connection.CloudConnector
-import com.nemetz.ble2cloud.data.BLEDataFormat
-import com.nemetz.ble2cloud.data.BLESensor
-import com.nemetz.ble2cloud.data.BLESensorData
-import com.nemetz.ble2cloud.data.ComplexSensor
+import com.nemetz.ble2cloud.data.*
 import com.nemetz.ble2cloud.ioScope
-import com.nemetz.ble2cloud.ui.home.DESCRIPTOR_CONFIG
 import com.nemetz.ble2cloud.utils.FirebaseCollections
 import com.nemetz.ble2cloud.utils.getBLESensor
 import kotlinx.coroutines.Job
@@ -43,7 +39,7 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
 
     private var sensors: ArrayList<BLESensor> = arrayListOf()
     private var foundSensors: ArrayList<ComplexSensor> = arrayListOf()
-    val scanFilters = arrayListOf<ScanFilter>()
+    private val scanFilters = arrayListOf<ScanFilter>()
 
     private var firestore: FirebaseFirestore? = null
     private var sensorRegistration: ListenerRegistration? = null
@@ -113,7 +109,7 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
                         service.characteristics.forEach { characteristic ->
                             if (sensor.BLESensor.values.any { it.value.uuid == characteristic.uuid.toString() }) {
                                 characteristic.descriptors.forEach { descriptor ->
-                                    if (descriptor.uuid == DESCRIPTOR_CONFIG) {
+                                    if (descriptor.uuid == BLEUUID.CONFIG) {
                                         gatt.readDescriptor(descriptor)
                                     }
                                 }
@@ -169,7 +165,7 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
         return START_NOT_STICKY
     }
 
-    fun die() {
+    private fun die() {
         bleScanner?.stopScan(scanCallback)
         stopForeground(true)
         stopSelf()

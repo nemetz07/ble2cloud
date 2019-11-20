@@ -6,7 +6,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 
-class RangeDialogFragment(val onClickListener: DialogInterface.OnClickListener) : DialogFragment() {
+class RangeDialogFragment(private val onClickListener: DialogInterface.OnClickListener) : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {

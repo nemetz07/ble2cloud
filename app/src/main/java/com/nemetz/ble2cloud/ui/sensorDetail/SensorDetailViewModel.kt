@@ -42,13 +42,13 @@ class SensorDetailViewModel : ViewModel() {
     val chartItems: ArrayList<LineChartItem> = arrayListOf()
     lateinit var cloudConnector: CloudConnector
 
-    val markers: ArrayList<MyMarker> = arrayListOf()
-    val addedMarkers: ArrayList<MyMarker> = arrayListOf()
+    private val markers: ArrayList<MyMarker> = arrayListOf()
+    private val addedMarkers: ArrayList<MyMarker> = arrayListOf()
 
     var isAlreadyInitialized: Boolean = false
-    var latLngBoundsBuilder: LatLngBounds.Builder? = null
+    private var latLngBoundsBuilder: LatLngBounds.Builder? = null
 
-    lateinit var mMap: GoogleMap
+    private lateinit var mMap: GoogleMap
 
     val onMapReadyCallback = OnMapReadyCallback { map ->
         mMap = map
