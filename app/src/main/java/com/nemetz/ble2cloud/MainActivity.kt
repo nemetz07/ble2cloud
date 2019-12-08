@@ -96,9 +96,7 @@ class MainActivity : AppCompatActivity(), EventListener<QuerySnapshot> {
     private fun checkCurrentUser() {
         // [START check_current_user]
         val user = FirebaseAuth.getInstance().currentUser
-        if (user != null) {
-            // User is signed in
-        } else {
+        if (user == null) {
             signIn()
         }
         // [END check_current_user]
@@ -106,15 +104,10 @@ class MainActivity : AppCompatActivity(), EventListener<QuerySnapshot> {
 
     override fun onStart() {
         super.onStart()
-        mCharacteristicRegistration =
-            FirebaseFirestore.getInstance().collection(FirebaseCollections.CHARACTERISTICS)
-                .addSnapshotListener(this)
-        mSensorRegistration =
-            FirebaseFirestore.getInstance().collection(FirebaseCollections.SENSORS)
-                .addSnapshotListener(this)
 
-        if (PermissionManager.checkLocationPermission(this))
+        if (PermissionManager.checkLocationPermission(this)){
             EventBus.getDefault().post(LocationPermissionAvailableEvent())
+        }
     }
 
     override fun onStop() {
@@ -259,10 +252,7 @@ class MainActivity : AppCompatActivity(), EventListener<QuerySnapshot> {
                 }
             }
             REQUEST_SIGNIN -> {
-                val response = IdpResponse.fromResultIntent(data)
-                if (resultCode == Activity.RESULT_OK) {
-                    // Successfully signed in
-                } else {
+                if (resultCode != Activity.RESULT_OK) {
                     if ((application as BLE2CloudApplication).isServiceRunning.value == true) {
                         Intent(this, DataCollectionService::class.java).apply { action = "STOP" }
                             .also { startService(it) }
@@ -323,6 +313,13 @@ class MainActivity : AppCompatActivity(), EventListener<QuerySnapshot> {
 
         registerReceiver(btReceiver, IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED))
         registerReceiver(locReceiver, IntentFilter(LocationManager.MODE_CHANGED_ACTION))
+
+        mCharacteristicRegistration =
+            FirebaseFirestore.getInstance().collection(FirebaseCollections.CHARACTERISTICS)
+                .addSnapshotListener(this)
+        mSensorRegistration =
+            FirebaseFirestore.getInstance().collection(FirebaseCollections.SENSORS)
+                .addSnapshotListener(this)
     }
 
     @Subscribe

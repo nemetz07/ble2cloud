@@ -21,6 +21,6 @@ object BLEScanSettings {
         .setScanMode(ScanSettings.SCAN_MODE_BALANCED)
         .setNumOfMatches(ScanSettings.MATCH_NUM_ONE_ADVERTISEMENT)
         .setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE)
-//        .setCallbackType(ScanSettings.CALLBACK_TYPE_FIRST_MATCH)
+        .setCallbackType(ScanSettings.CALLBACK_TYPE_FIRST_MATCH)
         .build()
 }

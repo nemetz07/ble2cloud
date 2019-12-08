@@ -1,5 +1,6 @@
 package com.nemetz.ble2cloud.ui.dataCollection
 
+import android.annotation.SuppressLint
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -56,16 +57,17 @@ class DataCollectionAdapter(
         val createdAt: Timestamp? = change.document.getTimestamp("createdAt")
         val createdBy: String? = change.document.getString("createdBy")
 
-        val isLocal = if (createdBy != null) createdBy == FirebaseAuth.getInstance().uid else true
-
         val sensor = sensors.find { it.address == address }
         val min = sensor?.values?.get(name)?.min
         val max = sensor?.values?.get(name)?.max
 
+        val isLocal = if (createdBy != null) createdBy == FirebaseAuth.getInstance().uid else true
+        val isAlert = (max?.let { value.toFloat() > it } ?: false) or (min?.let { value.toFloat() > it } ?: false)
+
         var status = DataCellStatus.LOCAL
         if (!isLocal) {
             status = DataCellStatus.REMOTE
-        } else if ((value.toFloat() > max ?: 100) or (value.toFloat() < min ?: -100)) {
+        } else if (isAlert) {
             status = DataCellStatus.ALERT
         }
 
@@ -94,6 +96,7 @@ class DataCollectionAdapter(
 
     override fun getItemCount(): Int = cellData.size
 
+    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val cell = cellData[position]
 
@@ -147,22 +150,6 @@ class DataCollectionAdapter(
                     itemView.setBackgroundColor(
                         this.itemView.resources.getColor(
                             R.color.dataCellAlert,
-                            null
-                        )
-                    )
-                }
-            }
-            else -> {
-                holder.apply {
-                    icon.setImageDrawable(
-                        this.itemView.resources.getDrawable(
-                            R.drawable.ic_smartphone,
-                            null
-                        )
-                    )
-                    itemView.setBackgroundColor(
-                        this.itemView.resources.getColor(
-                            R.color.dataCellLocal,
                             null
                         )
                     )

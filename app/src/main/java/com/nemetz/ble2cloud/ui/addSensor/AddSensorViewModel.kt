@@ -22,7 +22,7 @@ class AddSensorViewModel : ViewModel() {
     var bluetoothGatt: BluetoothGatt? = null
     var services: MutableList<BluetoothGattService>? = null
     var sensor: BLESensor? = null
-    val cellCharactersitics: ArrayList<CharacteristicCell> = arrayListOf()
+    val cellCharacteristics: ArrayList<CharacteristicCell> = arrayListOf()
 
     lateinit var charactersitics: ArrayList<BLECharacteristic>
 
@@ -64,7 +64,7 @@ class AddSensorViewModel : ViewModel() {
                 val bleCharacteristic =
                     charactersitics.find { it.uuid == characteristic.uuid.toString() }
                 bleCharacteristic?.data?.forEach { dataFormat ->
-                    cellCharactersitics.add(
+                    cellCharacteristics.add(
                         CharacteristicCell(
                             name = dataFormat.name,
                             uuid = bleCharacteristic.uuid ?: "-",
@@ -87,7 +87,7 @@ class AddSensorViewModel : ViewModel() {
     }
 
     fun saveSensor(cloudConnector: CloudConnector) {
-        cellCharactersitics.forEach { characteristic ->
+        cellCharacteristics.forEach { characteristic ->
             if (characteristic.enabled) {
                 val myCharacteristic = charactersitics.find { it.uuid == characteristic.uuid }
                 val dataFormat = myCharacteristic?.data?.find { it.name == characteristic.name }

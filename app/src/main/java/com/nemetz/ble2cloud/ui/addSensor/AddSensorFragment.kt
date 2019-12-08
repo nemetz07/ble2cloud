@@ -1,5 +1,6 @@
 package com.nemetz.ble2cloud.ui.addSensor
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -57,7 +58,7 @@ class AddSensorFragment : BaseFragment() {
         viewModel.charactersitics = (context as MainActivity).viewModel.characteristics
 
         viewManager = LinearLayoutManager(context)
-        viewAdapter = CharacteristicsAdapter(viewModel.cellCharactersitics)
+        viewAdapter = CharacteristicsAdapter(viewModel.cellCharacteristics)
 
         addSensorRecyclerView.apply {
             layoutManager = viewManager
@@ -79,6 +80,7 @@ class AddSensorFragment : BaseFragment() {
         viewModel.discoverCharacteristics(context!!.applicationContext)
     }
 
+    @SuppressLint("SetTextI18n")
     @Subscribe
     fun onSensorServicesDiscovered(event: ServicesDiscoveredEvent) {
         uiScope.launch {

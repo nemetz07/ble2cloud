@@ -259,8 +259,8 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
 
             if (locationRecord) {
                 fusedLocationClient?.lastLocation?.addOnSuccessListener {
-                    sensorData.latitude = it.latitude
-                    sensorData.longitude = it.longitude
+                    sensorData.latitude = it?.latitude
+                    sensorData.longitude = it?.longitude
                     sensorData.sensorName = sensor.BLESensor.name
                     sensorData.address = sensor.BLESensor.address
                     if (sensorValue.format != null) {
