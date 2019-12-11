@@ -2,6 +2,7 @@ package com.nemetz.ble2cloud.ui.sensorDetail
 
 import android.content.DialogInterface
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.util.Log
 import android.view.View
 import androidx.fragment.app.FragmentManager
@@ -49,6 +50,8 @@ class SensorDetailViewModel : ViewModel() {
     private var latLngBoundsBuilder: LatLngBounds.Builder? = null
 
     private lateinit var mMap: GoogleMap
+
+    var outlierDataIcon: Drawable? = null
 
     val onMapReadyCallback = OnMapReadyCallback { map ->
         mMap = map
@@ -289,7 +292,11 @@ class SensorDetailViewModel : ViewModel() {
                 )
             }
         }
-        val lineDataSet = LineDataSet(entries.reversed(), BLESensorValue.format!!.name)
+
+        entries.reverse()
+
+        simpleValidate(entries)
+        val lineDataSet = LineDataSet(entries, BLESensorValue.format!!.name)
         styleDataSet(lineDataSet)
 
         if (position == null) {
@@ -319,15 +326,121 @@ class SensorDetailViewModel : ViewModel() {
         EventBus.getDefault().post(ChartAddedEvent())
     }
 
+    private fun simpleValidate(entries: ArrayList<Entry>) {
+        val sortedEntries = entries.sortedBy {
+            it.y
+        }
+
+        val lowerEntries: List<Entry>
+        val upperEntries: List<Entry>
+
+        if (sortedEntries.size % 2 == 0) {
+            lowerEntries = sortedEntries.subList(0, sortedEntries.size / 2)
+            upperEntries = sortedEntries.subList(sortedEntries.size / 2, sortedEntries.size)
+        } else {
+            lowerEntries = sortedEntries.subList(0, sortedEntries.size / 2)
+            upperEntries =
+                sortedEntries.subList(sortedEntries.size / 2 + 1, sortedEntries.size)
+        }
+
+        val q1 = median(lowerEntries)
+        val q3 = median(upperEntries)
+
+        val iqr = q3 - q1
+        val lowerFence = q1 - 1.5 * iqr
+        val upperFence = q3 + 1.5 * iqr
+
+        Log.d(TAG, "Lower fence: $lowerFence, Upper fence: $upperFence")
+
+        entries.forEach {
+            if ((it.y > upperFence) or (it.y < lowerFence)) {
+                it.icon = outlierDataIcon
+            }
+        }
+    }
+
+    private fun validateData(entries: ArrayList<Entry>) {
+        val sections = arrayListOf<ArrayList<Entry>>()
+
+        var k = 0
+        var n = 0
+
+        for (i in 0 until entries.size) {
+            if (i > 0) {
+                if ((entries[i].x - entries[i - 1].x > 5000f) or (n > 20)) {
+                    k++
+                    sections.add(k, arrayListOf())
+                    n = 0
+                }
+            } else {
+                sections.add(k, arrayListOf())
+            }
+
+            sections[k].add(n, entries[i])
+            n++
+        }
+
+        sections.forEach { sectionEntries ->
+
+            if (sectionEntries.size > 1) {
+
+                val sortedEntries = sectionEntries.sortedBy {
+                    it.y
+                }
+
+                val lowerEntries: List<Entry>
+                val upperEntries: List<Entry>
+
+                if (sortedEntries.size % 2 == 0) {
+                    lowerEntries = sortedEntries.subList(0, sortedEntries.size / 2)
+                    upperEntries = sortedEntries.subList(sortedEntries.size / 2, sortedEntries.size)
+                } else {
+                    lowerEntries = sortedEntries.subList(0, sortedEntries.size / 2)
+                    upperEntries =
+                        sortedEntries.subList(sortedEntries.size / 2 + 1, sortedEntries.size)
+                }
+
+                val q1 = median(lowerEntries)
+                val q3 = median(upperEntries)
+
+                val iqr = q3 - q1
+                val lowerFence = q1 - 1.5 * iqr
+                val upperFence = q3 + 1.5 * iqr
+
+                Log.d(TAG, "Lower fence: $lowerFence, Upper fence: $upperFence")
+
+//            val colors = arrayListOf<Int>()
+
+                sectionEntries.forEach {
+                    if ((it.y > upperFence) or (it.y < lowerFence)) {
+//                    colors.add(Color.parseColor("#A62639"))
+                        it.icon = outlierDataIcon
+//                } else {
+////                    colors.add(Color.parseColor("#26A69A"))
+                    }
+                }
+            }
+        }
+    }
+
+    private fun median(data: List<Entry>): Float {
+        if (data.size % 2 == 0)
+            return (data[data.size / 2].y + data[data.size / 2 - 1].y) / 2
+        else
+            return data[data.size / 2].y
+    }
+
     private fun styleDataSet(lineDataSet: LineDataSet) {
         lineDataSet.apply {
             lineWidth = 0f
             circleRadius = 3f
             setDrawCircleHole(false)
-            highLightColor = Color.rgb(244, 117, 117)
             setCircleColor(Color.parseColor("#26A69A"))
+            highLightColor = Color.rgb(244, 117, 117)
             setDrawValues(false)
         }
+
+
     }
 
     private fun updateMap() {

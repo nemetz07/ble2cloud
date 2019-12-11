@@ -83,6 +83,7 @@ class SensorDetailFragment : BaseFragment() {
         Utils.init(context)
 
         viewModel.sensor = args.sensor
+        viewModel.outlierDataIcon = context?.getDrawable(R.drawable.ic_triangle)
 
         viewAdapter = ChartDataAdapter(context!!, viewModel.chartItems)
         chartListView.adapter = viewAdapter
