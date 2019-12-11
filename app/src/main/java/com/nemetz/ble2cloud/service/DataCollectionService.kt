@@ -1,5 +1,6 @@
 package com.nemetz.ble2cloud.service
 
+import android.annotation.SuppressLint
 import android.app.*
 import android.bluetooth.*
 import android.bluetooth.le.ScanCallback
@@ -10,10 +11,12 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.IBinder
+import android.provider.Settings
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.*
 import com.nemetz.ble2cloud.BLE2CloudApplication
 import com.nemetz.ble2cloud.MainActivity
@@ -293,7 +296,7 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
     ): BLESensorData {
         val data = characteristic.getFloatValue(BLEDataFormat.dataFormat(), BLEDataFormat.offset)
 
-        return BLESensorData(value = data.toString())
+        return BLESensorData(value = data.toString(), createdBy = getId())
     }
 
     private fun processIntegerData(
@@ -302,7 +305,7 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
     ): BLESensorData {
         val data = characteristic.getIntValue(BLEDataFormat.dataFormat(), BLEDataFormat.offset)
 
-        return BLESensorData(value = data.toString())
+        return BLESensorData(value = data.toString(), createdBy = getId())
     }
 
     private fun processStringData(
@@ -316,7 +319,19 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
             dataString
         }
 
-        return BLESensorData(value = data)
+        return BLESensorData(value = data, createdBy = getId())
+    }
+
+    @SuppressLint("HardwareIds")
+    private fun getId(): String {
+        val androidId = Settings.Secure.getString(
+            applicationContext.contentResolver,
+            Settings.Secure.ANDROID_ID
+        )
+
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+
+        return "$androidId::$uid"
     }
 
     private fun saveData(address: String, dataFormat: BLEDataFormat, sensorData: BLESensorData) {
@@ -420,8 +435,8 @@ class DataCollectionService : Service(), EventListener<QuerySnapshot> {
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_cpu)
-            .setContentTitle("Bluetooth Data Collection")
-            .setContentText("Data collection in progress...")
+            .setContentTitle(getString(R.string.collection_notification_title))
+            .setContentText(getString(R.string.collection_notification_message))
             .setContentIntent(pendingIntent)
             .addAction(R.drawable.ic_dialog_close_light, "Stop", stopPendingIntent)
             .build()

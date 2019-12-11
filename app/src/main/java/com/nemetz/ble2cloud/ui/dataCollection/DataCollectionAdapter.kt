@@ -24,7 +24,8 @@ import java.util.*
 
 class DataCollectionAdapter(
     private val cellData: ArrayList<DataCollectionCell>,
-    val sensors: ArrayList<BLESensor>
+    val sensors: ArrayList<BLESensor>,
+    val uid: String
 ) :
     RecyclerView.Adapter<DataCollectionAdapter.ViewHolder>(), EventListener<QuerySnapshot> {
 
@@ -61,7 +62,7 @@ class DataCollectionAdapter(
         val min = sensor?.values?.get(name)?.min
         val max = sensor?.values?.get(name)?.max
 
-        val isLocal = if (createdBy != null) createdBy == FirebaseAuth.getInstance().uid else true
+        val isLocal = if (createdBy != null) createdBy == uid else true
         val isAlert = (max?.let { value.toFloat() > it } ?: false) or (min?.let { value.toFloat() > it } ?: false)
 
         var status = DataCellStatus.LOCAL

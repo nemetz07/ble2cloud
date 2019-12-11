@@ -1,7 +1,9 @@
 package com.nemetz.ble2cloud.ui.dataCollection
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,8 +11,8 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import com.nemetz.ble2cloud.BLE2CloudApplication
 import com.nemetz.ble2cloud.MainActivity
@@ -44,7 +46,7 @@ class DataCollectionFragment : BaseFragment() {
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProviders.of(this).get(DataCollectionViewModel::class.java)
         viewAdapter =
-            DataCollectionAdapter(viewModel.cellData, (context as MainActivity).viewModel.sensors)
+            DataCollectionAdapter(viewModel.cellData, (context as MainActivity).viewModel.sensors, getUID())
         viewManager = LinearLayoutManager(context)
 
         dataCollectionRecyclerView.apply {
@@ -53,6 +55,18 @@ class DataCollectionFragment : BaseFragment() {
         }
 
         init()
+    }
+
+    @SuppressLint("HardwareIds")
+    private fun getUID(): String {
+        val androidId = Settings.Secure.getString(
+            context?.contentResolver,
+            Settings.Secure.ANDROID_ID
+        )
+
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+
+        return "$androidId::$uid"
     }
 
     private fun init() {
