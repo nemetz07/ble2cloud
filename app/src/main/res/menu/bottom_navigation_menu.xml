@@ -5,15 +5,15 @@
         android:id="@+id/action_home"
         android:enabled="true"
         android:icon="@drawable/ic_home"
-        android:title="Home" />
+        android:title="@string/menu_home" />
     <item
         android:id="@+id/action_sensors"
         android:enabled="true"
         android:icon="@drawable/ic_cpu"
-        android:title="Sensors" />
+        android:title="@string/menu_sensors" />
     <item
         android:id="@+id/action_settings"
         android:enabled="true"
         android:icon="@drawable/ic_settings"
-        android:title="Settings" />
+        android:title="@string/menu_settings" />
 </menu>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BLE2Cloud</string>
+    <string name="icon_heart">&#xe800;</string>
+    <string name="icon_bat_charge">&#xe801;</string>
+    <string name="icon_mobile">&#xe806;</string>
+    <string name="icon_monitor">&#xe807;</string>
+    <string name="icon_apple">&#xf179;</string>
+    <string name="icon_cab">&#xf1b9;</string>
+    <string name="icon_database">&#xf1c0;</string>
+    <string name="icon_diamond">&#xf219;</string>
+    <string name="icon_thermometer">&#xf2c7;</string>
+    <string name="menu_home">Főoldal</string>
+    <string name="menu_sensors">Szenzorok</string>
+    <string name="menu_settings">Beállítások</string>
+    <string name="settings_sign_out">Kijelentkezés</string>
+    <string name="settings_username">FELHASZNÁLÓNÉV</string>
+    <string name="settings_email">EMAIL</string>
+    <string name="scanner_pull_text">Húzza lefelé a szenzorok kereséséhez</string>
+    <string name="scanner_back">Vissza</string>
+    <string name="collection_notification_message">Az adatgyűjtés folyamatban van…</string>
+    <string name="collection_notification_title">Bluetooth Adatgyűjtés</string>
+</resources>

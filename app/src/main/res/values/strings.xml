@@ -9,4 +9,14 @@
     <string name="icon_database">&#xf1c0;</string>
     <string name="icon_diamond">&#xf219;</string>
     <string name="icon_thermometer">&#xf2c7;</string>
+    <string name="menu_home">Home</string>
+    <string name="menu_sensors">Sensors</string>
+    <string name="menu_settings">Settings</string>
+    <string name="settings_sign_out">Sign out</string>
+    <string name="settings_username">USERNAME</string>
+    <string name="settings_email">EMAIL</string>
+    <string name="scanner_pull_text">Pull down to scan for sensors</string>
+    <string name="scanner_back">Back</string>
+    <string name="collection_notification_message">Data collection in progress…</string>
+    <string name="collection_notification_title">Bluetooth Data Collection</string>
 </resources>
